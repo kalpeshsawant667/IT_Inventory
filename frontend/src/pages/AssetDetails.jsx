@@ -37,13 +37,16 @@ export default function AssetDetail() {
         </div>
         <div className="flex space-x-2">
           <button onClick={() => navigate(`/assets/${id}/edit`)} className="btn-secondary">
-            <Edit className="w-4 h-4 mr-2" />Edit
+            <Edit className="w-4 h-4 mr-2" />
+            Edit
           </button>
           <button onClick={handleDelete} className="btn-secondary text-red-600 hover:text-red-700 border-red-200 hover:bg-red-50">
-            <Trash2 className="w-4 h-4 mr-2" />Delete
+            <Trash2 className="w-4 h-4 mr-2" />
+            Delete
           </button>
         </div>
       </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
           <div className="card p-6">
@@ -67,13 +70,19 @@ export default function AssetDetail() {
               </div>
             )}
           </div>
+
           <div className="card p-6">
-            <h3 className="text-lg font-semibold mb-4 flex items-center"><History className="w-5 h-5 mr-2" />Status History</h3>
+            <h3 className="text-lg font-semibold mb-4 flex items-center">
+              <History className="w-5 h-5 mr-2" />
+              Status History
+            </h3>
             <div className="space-y-3">
               {history.map((h) => (
                 <div key={h.id} className="flex items-start justify-between py-2 border-b border-gray-100 last:border-0">
                   <div>
-                    <p className="text-sm font-medium">{h.old_status || 'N/A'} → {h.new_status || 'N/A'}</p>
+                    <p className="text-sm font-medium">
+                      {h.old_status || 'N/A'} → {h.new_status || 'N/A'}
+                    </p>
                     <p className="text-xs text-gray-500">{h.reason}</p>
                   </div>
                   <span className="text-xs text-gray-400">{new Date(h.created_at).toLocaleString()}</span>
@@ -83,6 +92,7 @@ export default function AssetDetail() {
             </div>
           </div>
         </div>
+
         <div className="space-y-6">
           <div className="card p-6">
             <h3 className="text-lg font-semibold mb-4">Assignment</h3>
@@ -91,7 +101,9 @@ export default function AssetDetail() {
                 <p className="text-sm font-medium text-gray-900">{asset.assigned_user.first_name} {asset.assigned_user.last_name}</p>
                 <p className="text-sm text-gray-500">{asset.assigned_user.email}</p>
               </div>
-            ) : <p className="text-sm text-gray-500">Not assigned</p>}
+            ) : (
+              <p className="text-sm text-gray-500">Not assigned</p>
+            )}
           </div>
         </div>
       </div>

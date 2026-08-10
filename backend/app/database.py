@@ -1,23 +1,33 @@
 """Database configuration and session management."""
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
-from sqlalchemy.pool import StaticPool
+from urllib.parse import quote_plus
 import os
 from dotenv import load_dotenv
 
 load_dotenv()
 
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:password@localhost:5432/it_inventory")
+# Build connection using raw ODBC string (handles instance names correctly)
+odbc_str = (
+    "DRIVER={ODBC Driver 17 for SQL Server};"
+    "SERVER=PC-PF3RD5DF\\SQLEXPRESS;"
+    "DATABASE=IT_Inventory;"
+    "UID=sa;"
+    "PWD=Kalsaw@1234554321!;"
+)
 
-# For SQLite in-memory testing (optional)
-if DATABASE_URL.startswith("sqlite"):
-    engine = create_engine(
-        DATABASE_URL,
-        connect_args={"check_same_thread": False},
-        poolclass=StaticPool,
-    )
-else:
-    engine = create_engine(DATABASE_URL, pool_pre_ping=True)
+# If using SQL Server auth instead of Windows auth, use this:
+# odbc_str = (
+#     "DRIVER={ODBC Driver 17 for SQL Server};"
+#     "SERVER=PC-PF3RD5DF\\SQLEXPRESS;"
+#     "DATABASE=IT_Inventory;"
+#     "UID=sa;"
+#     "PWD=YourPassword;"
+# )
+
+DATABASE_URL = f"mssql+pyodbc:///?odbc_connect={quote_plus(odbc_str)}"
+
+engine = create_engine(DATABASE_URL, pool_pre_ping=True)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()

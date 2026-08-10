@@ -1,4 +1,3 @@
-"""FastAPI application entry point."""
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import os
@@ -6,8 +5,6 @@ import os
 from app.database import engine, Base
 from app.routers import auth, users, assets, assignments, locations, categories, vendors, maintenance, dashboard
 
-# Create tables (use Alembic in production)
-Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title="IT Inventory API",

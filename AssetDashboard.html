@@ -1,0 +1,1009 @@
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0B0F14;
+    --panel:#121822;
+    --panel-alt:#182130;
+    --border:#26313F;
+    --text:#E7ECF3;
+    --text-dim:#8B96A6;
+    --text-faint:#5C6779;
+    --accent:#22E6AC;
+    --accent-dim:#15A67D;
+    --accent-glow:rgba(34,230,172,0.14);
+    --warn:#F5A93E;
+    --warn-glow:rgba(245,169,62,0.14);
+    --danger:#F16368;
+    --danger-glow:rgba(241,99,104,0.14);
+    --info:#5B93FF;
+    --info-glow:rgba(91,147,255,0.14);
+    --radius:10px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;height:100%;}
+  #root{display:flex;min-height:100vh;}
+  ::selection{background:var(--accent-glow);color:var(--accent);}
+  ::-webkit-scrollbar{width:10px;height:10px;}
+  ::-webkit-scrollbar-track{background:transparent;}
+  ::-webkit-scrollbar-thumb{background:var(--border);border-radius:6px;}
+
+  h1,h2,h3,h4,.display{font-family:'Space Grotesk',sans-serif;letter-spacing:-0.01em;}
+  .mono{font-family:'JetBrains Mono',monospace;}
+
+  /* ---- Sidebar ---- */
+  #sidebar{
+    width:230px;flex:0 0 230px;background:var(--panel);border-right:1px solid var(--border);
+    display:flex;flex-direction:column;position:sticky;top:0;height:100vh;
+  }
+  .brand{padding:22px 20px 18px;border-bottom:1px solid var(--border);}
+  .brand-mark{display:flex;align-items:center;gap:10px;}
+  .brand-ticks{display:flex;gap:2px;align-items:flex-end;height:18px;}
+  .brand-ticks span{width:3px;background:var(--accent);display:inline-block;}
+  .brand-title{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:16px;letter-spacing:0.02em;}
+  .brand-sub{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-faint);margin-top:4px;letter-spacing:0.08em;text-transform:uppercase;}
+
+  nav.navlist{padding:14px 12px;display:flex;flex-direction:column;gap:2px;flex:1;overflow-y:auto;}
+  .navitem{
+    display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;cursor:pointer;
+    color:var(--text-dim);font-size:13.5px;font-weight:500;transition:background .12s,color .12s;user-select:none;
+  }
+  .navitem:hover{background:var(--panel-alt);color:var(--text);}
+  .navitem.active{background:var(--accent-glow);color:var(--accent);}
+  .navitem svg{flex:0 0 16px;}
+  .nav-badge{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-faint);background:var(--panel-alt);padding:1px 6px;border-radius:20px;}
+  .navitem.active .nav-badge{color:var(--accent);}
+
+  .sidebar-foot{padding:14px 20px;border-top:1px solid var(--border);font-size:11px;color:var(--text-faint);font-family:'JetBrains Mono',monospace;}
+
+  /* ---- Main ---- */
+  #main{flex:1;min-width:0;display:flex;flex-direction:column;}
+  #topbar{
+    display:flex;align-items:center;gap:14px;padding:16px 28px;border-bottom:1px solid var(--border);
+    position:sticky;top:0;background:rgba(11,15,20,0.9);backdrop-filter:blur(6px);z-index:5;
+  }
+  .searchbox{
+    flex:1;max-width:420px;display:flex;align-items:center;gap:8px;background:var(--panel);
+    border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text-dim);
+  }
+  .searchbox input{background:transparent;border:none;outline:none;color:var(--text);font-size:13px;width:100%;font-family:'Inter',sans-serif;}
+  .topbar-spacer{flex:1;}
+  .btn{
+    display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;font-size:13px;font-weight:600;
+    cursor:pointer;border:1px solid var(--border);background:var(--panel);color:var(--text);transition:all .12s;white-space:nowrap;
+  }
+  .btn:hover{border-color:var(--text-faint);}
+  .btn-primary{background:var(--accent);color:#06231A;border-color:var(--accent);}
+  .btn-primary:hover{background:#3EF2C0;border-color:#3EF2C0;}
+  .btn-danger{color:var(--danger);}
+  .btn-danger:hover{border-color:var(--danger);}
+  .btn-ghost{border-color:transparent;background:transparent;}
+  .btn-ghost:hover{background:var(--panel-alt);}
+  .btn-sm{padding:5px 10px;font-size:12px;}
+
+  #content{padding:26px 28px 60px;flex:1;}
+  .view-title{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;}
+  .view-title h1{font-size:22px;margin:0;}
+  .view-title p{color:var(--text-dim);font-size:13px;margin:4px 0 0;}
+
+  /* ---- Cards / KPIs ---- */
+  .kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin-bottom:24px;}
+  .kpi{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;position:relative;overflow:hidden;}
+  .kpi .label{font-size:11px;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-faint);font-weight:600;}
+  .kpi .value{font-family:'Space Grotesk',sans-serif;font-size:28px;font-weight:700;margin-top:6px;}
+  .kpi .sub{font-size:12px;color:var(--text-dim);margin-top:4px;}
+  .kpi .accentbar{position:absolute;left:0;top:0;bottom:0;width:3px;}
+
+  .grid-2{display:grid;grid-template-columns:1.3fr 1fr;gap:16px;}
+  @media (max-width:980px){.grid-2{grid-template-columns:1fr;}}
+  .panel{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;}
+  .panel h3{font-size:14px;margin:0 0 14px;color:var(--text);}
+  .panel h3 .count{color:var(--text-faint);font-weight:400;font-family:'JetBrains Mono',monospace;font-size:12px;}
+
+  /* bar chart */
+  .barrow{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+  .barrow .barlabel{width:110px;font-size:12px;color:var(--text-dim);flex:0 0 110px;}
+  .barrow .bartrack{flex:1;height:10px;background:var(--panel-alt);border-radius:5px;overflow:hidden;}
+  .barrow .barfill{height:100%;border-radius:5px;}
+  .barrow .barval{width:34px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text-dim);}
+
+  .activity-item{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);font-size:12.5px;}
+  .activity-item:last-child{border-bottom:none;}
+  .activity-dot{width:6px;height:6px;border-radius:50%;margin-top:5px;flex:0 0 6px;background:var(--accent);}
+  .activity-item .t{color:var(--text-faint);font-family:'JetBrains Mono',monospace;font-size:10.5px;white-space:nowrap;}
+
+  .expiry-item{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:12.5px;}
+  .expiry-item:last-child{border-bottom:none;}
+
+  /* ---- Table ---- */
+  .table-wrap{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;}
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  thead th{text-align:left;font-size:10.5px;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-faint);
+    padding:12px 16px;border-bottom:1px solid var(--border);font-weight:600;background:var(--panel-alt);}
+  tbody td{padding:12px 16px;border-bottom:1px solid var(--border);vertical-align:middle;}
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr{cursor:pointer;transition:background .1s;}
+  tbody tr:hover{background:var(--panel-alt);}
+  .empty-row td{text-align:center;color:var(--text-faint);padding:40px;cursor:default;}
+  .empty-row:hover{background:transparent;}
+
+  .filters{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;}
+  select, .input{
+    background:var(--panel);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:8px;
+    font-size:12.5px;font-family:'Inter',sans-serif;outline:none;
+  }
+  select:focus,.input:focus{border-color:var(--accent-dim);}
+
+  /* asset tag chip - signature element */
+  .tag-chip{
+    display:inline-flex;align-items:stretch;font-family:'JetBrains Mono',monospace;font-size:11.5px;
+    background:var(--panel-alt);border:1px solid var(--border);border-radius:5px;overflow:hidden;color:var(--text);
+  }
+  .tag-chip .ticks{display:flex;align-items:center;gap:1.5px;padding:0 5px;background:#0E141C;border-right:1px solid var(--border);}
+  .tag-chip .ticks span{width:1.5px;background:var(--accent);display:inline-block;}
+  .tag-chip .val{padding:4px 8px;}
+
+  /* status pill */
+  .pill{display:inline-flex;align-items:center;gap:6px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600;letter-spacing:0.02em;}
+  .pill .dot{width:6px;height:6px;border-radius:50%;}
+  .pill-available{background:var(--accent-glow);color:var(--accent);}
+  .pill-available .dot{background:var(--accent);}
+  .pill-assigned{background:var(--info-glow);color:var(--info);}
+  .pill-assigned .dot{background:var(--info);}
+  .pill-inrepair{background:var(--warn-glow);color:var(--warn);}
+  .pill-inrepair .dot{background:var(--warn);}
+  .pill-retired{background:rgba(139,150,166,0.14);color:var(--text-dim);}
+  .pill-retired .dot{background:var(--text-dim);}
+  .pill-disposed{background:var(--danger-glow);color:var(--danger);}
+  .pill-disposed .dot{background:var(--danger);}
+
+  .name-cell{display:flex;flex-direction:column;gap:2px;}
+  .name-cell .nm{font-weight:600;}
+  .name-cell .mm{color:var(--text-faint);font-size:11.5px;}
+
+  /* ---- Modal ---- */
+  .overlay{position:fixed;inset:0;background:rgba(6,9,13,0.7);display:flex;align-items:flex-start;justify-content:center;
+    padding:40px 20px;overflow-y:auto;z-index:50;backdrop-filter:blur(2px);}
+  .modal{background:var(--panel);border:1px solid var(--border);border-radius:14px;width:100%;max-width:560px;overflow:hidden;}
+  .modal-head{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--border);}
+  .modal-head h3{margin:0;font-size:16px;}
+  .modal-body{padding:20px 22px;max-height:70vh;overflow-y:auto;}
+  .modal-foot{padding:16px 22px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px;}
+  .field{margin-bottom:14px;}
+  .field label{display:block;font-size:11.5px;color:var(--text-dim);margin-bottom:6px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;}
+  .field input, .field select, .field textarea{width:100%;background:var(--panel-alt);border:1px solid var(--border);
+    color:var(--text);padding:9px 11px;border-radius:8px;font-size:13px;font-family:'Inter',sans-serif;outline:none;}
+  .field textarea{resize:vertical;min-height:70px;font-family:'Inter',sans-serif;}
+  .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--accent-dim);}
+  .field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .close-x{cursor:pointer;color:var(--text-faint);padding:4px;border-radius:6px;}
+  .close-x:hover{color:var(--text);background:var(--panel-alt);}
+
+  /* detail drawer */
+  .drawer-overlay{position:fixed;inset:0;background:rgba(6,9,13,0.6);z-index:40;}
+  .drawer{position:fixed;top:0;right:0;bottom:0;width:min(480px,100%);background:var(--panel);border-left:1px solid var(--border);
+    z-index:41;overflow-y:auto;box-shadow:-20px 0 50px rgba(0,0,0,0.4);}
+  .drawer-head{padding:22px 24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:flex-start;}
+  .drawer-body{padding:22px 24px;}
+  .detail-row{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);font-size:12.5px;}
+  .detail-row .k{color:var(--text-faint);}
+  .detail-row .v{color:var(--text);font-weight:500;text-align:right;}
+  .section-label{font-size:11px;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-faint);font-weight:700;margin:18px 0 8px;}
+  .barcode-visual{display:flex;align-items:center;gap:1.5px;height:36px;margin:14px 0;padding:8px 10px;background:#0E141C;border:1px solid var(--border);border-radius:6px;width:fit-content;}
+  .barcode-visual span{background:var(--accent);display:inline-block;height:100%;}
+
+  .toast-wrap{position:fixed;bottom:24px;right:24px;display:flex;flex-direction:column;gap:8px;z-index:100;}
+  .toast{background:var(--panel-alt);border:1px solid var(--border);border-left:3px solid var(--accent);color:var(--text);
+    padding:11px 16px;border-radius:8px;font-size:13px;box-shadow:0 8px 24px rgba(0,0,0,0.35);animation:slidein .18s ease-out;min-width:220px;}
+  .toast.danger{border-left-color:var(--danger);}
+  @keyframes slidein{from{transform:translateY(8px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+
+  .empty-state{text-align:center;padding:60px 20px;color:var(--text-faint);}
+  .empty-state h3{color:var(--text-dim);font-size:15px;margin-bottom:6px;}
+
+  .loading-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;width:100%;gap:14px;color:var(--text-dim);font-family:'JetBrains Mono',monospace;font-size:12px;}
+  .spinner{width:22px;height:22px;border-radius:50%;border:2px solid var(--border);border-top-color:var(--accent);animation:spin .7s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  .subtabs{display:flex;gap:6px;margin-bottom:18px;border-bottom:1px solid var(--border);}
+  .subtab{padding:9px 4px;margin-right:18px;font-size:13px;color:var(--text-dim);cursor:pointer;border-bottom:2px solid transparent;font-weight:500;}
+  .subtab.active{color:var(--text);border-bottom-color:var(--accent);}
+
+  .list-row{display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--border);}
+  .list-row:last-child{border-bottom:none;}
+
+  .conf-box{background:var(--panel-alt);border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-size:12.5px;color:var(--text-dim);margin-bottom:14px;}
+</style>
+
+<div id="root"><div class="loading-screen"><div class="spinner"></div><div>LOADING ASSET LEDGER…</div></div></div>
+
+<script>
+(function(){
+  "use strict";
+
+  var STORAGE_KEY = "asset-ledger-state-v1";
+  var state = null;
+  var ui = { view:"dashboard", search:"", assetFilters:{status:"", category:"", location:""}, drawerAssetId:null, modal:null, reportsTab:"summary", toasts:[] };
+
+  var ICONS = {
+    dashboard:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>',
+    assets:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="7" width="18" height="13" rx="1.5"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>',
+    assign:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 8l-3 3-1.5-1.5"/></svg>',
+    maint:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a4 4 0 1 0-5.4 5.4L2 19l3 3 7.3-7.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2-2z"/></svg>',
+    settings:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.6 1z"/></svg>',
+    reports:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l3-3 3 3 5-6"/></svg>',
+    search:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>',
+    plus:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>',
+    close:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>',
+    trash:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L4 6"/></svg>',
+    edit:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>'
+  };
+
+  var STATUS_LIST = ["Available","Assigned","In Repair","Retired","Disposed"];
+  function statusClass(s){
+    return {"Available":"pill-available","Assigned":"pill-assigned","In Repair":"pill-inrepair","Retired":"pill-retired","Disposed":"pill-disposed"}[s] || "pill-available";
+  }
+  function statusColor(s){
+    return {"Available":"var(--accent)","Assigned":"var(--info)","In Repair":"var(--warn)","Retired":"var(--text-dim)","Disposed":"var(--danger)"}[s] || "var(--accent)";
+  }
+
+  function uid(prefix){ return prefix + "_" + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+  function fmtDate(d){ if(!d) return "—"; var dt=new Date(d); if(isNaN(dt)) return d; return dt.toLocaleDateString("en-US",{year:"numeric",month:"short",day:"numeric"}); }
+  function fmtMoney(n){ if(n===undefined||n===null||n==="") return "—"; return "$" + Number(n).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}); }
+  function daysUntil(d){ if(!d) return null; var diff = (new Date(d) - new Date()); return Math.ceil(diff/86400000); }
+  function escapeHtml(s){ if(s===undefined||s===null) return ""; return String(s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];}); }
+
+  function seedData(){
+    var categories = [
+      {id:"cat_1", name:"Laptops"}, {id:"cat_2", name:"Monitors"}, {id:"cat_3", name:"Mobile Devices"},
+      {id:"cat_4", name:"Networking"}, {id:"cat_5", name:"Peripherals"}, {id:"cat_6", name:"Servers"}
+    ];
+    var locations = [
+      {id:"loc_1", name:"HQ - Floor 3"}, {id:"loc_2", name:"HQ - Floor 4"}, {id:"loc_3", name:"Warehouse A"},
+      {id:"loc_4", name:"Remote / Field"}, {id:"loc_5", name:"Data Center - Rack 12"}
+    ];
+    var users = [
+      {id:"u_1", name:"Maya Chen", email:"maya.chen@company.com", department:"Engineering"},
+      {id:"u_2", name:"Diego Ferreira", email:"diego.f@company.com", department:"Sales"},
+      {id:"u_3", name:"Priya Nair", email:"priya.nair@company.com", department:"Finance"},
+      {id:"u_4", name:"Tom Whitfield", email:"tom.w@company.com", department:"IT Ops"},
+      {id:"u_5", name:"Aisha Bello", email:"aisha.bello@company.com", department:"Marketing"}
+    ];
+    function addDays(n){ var d=new Date(); d.setDate(d.getDate()+n); return d.toISOString().slice(0,10); }
+    var assets = [
+      {id:"a_1", tag:"IT-LAP-00123", name:"Dell Latitude 7440", category:"Laptops", manufacturer:"Dell", model:"Latitude 7440", serialNumber:"DL7440-88213", purchaseDate:"2024-02-10", warrantyExpiry:addDays(12), cost:1450, vendor:"Dell Direct", location:"HQ - Floor 3", status:"Assigned", assignedTo:"u_1", notes:"Primary dev machine.", history:[{ts:"2024-02-10", text:"Asset registered"},{ts:"2024-02-14", text:"Assigned to Maya Chen"}]},
+      {id:"a_2", tag:"IT-LAP-00124", name:"MacBook Pro 14\"", category:"Laptops", manufacturer:"Apple", model:"MacBook Pro 14 M3", serialNumber:"C02FX2Q1", purchaseDate:"2023-11-02", warrantyExpiry:addDays(-30), cost:2399, vendor:"Apple Business", location:"HQ - Floor 4", status:"Available", assignedTo:null, notes:"", history:[{ts:"2023-11-02", text:"Asset registered"}]},
+      {id:"a_3", tag:"IT-MON-00045", name:"Dell UltraSharp 27\"", category:"Monitors", manufacturer:"Dell", model:"U2723QE", serialNumber:"DU27-55012", purchaseDate:"2023-06-15", warrantyExpiry:addDays(180), cost:520, vendor:"Dell Direct", location:"HQ - Floor 3", status:"Available", assignedTo:null, notes:"", history:[{ts:"2023-06-15", text:"Asset registered"}]},
+      {id:"a_4", tag:"IT-PHN-00301", name:"iPhone 15", category:"Mobile Devices", manufacturer:"Apple", model:"iPhone 15 128GB", serialNumber:"F2LX88ANQ", purchaseDate:"2023-10-05", warrantyExpiry:addDays(-5), cost:799, vendor:"Verizon Business", location:"Remote / Field", status:"Assigned", assignedTo:"u_2", notes:"Field sales device.", history:[{ts:"2023-10-05", text:"Asset registered"},{ts:"2023-10-08", text:"Assigned to Diego Ferreira"}]},
+      {id:"a_5", tag:"IT-NET-00012", name:"Cisco Catalyst 9200", category:"Networking", manufacturer:"Cisco", model:"C9200L-24P", serialNumber:"FCW2540L0AB", purchaseDate:"2022-09-01", warrantyExpiry:addDays(365), cost:3200, vendor:"CDW", location:"Data Center - Rack 12", status:"Available", assignedTo:null, notes:"Core switch, floor 3-4.", history:[{ts:"2022-09-01", text:"Asset registered"}]},
+      {id:"a_6", tag:"IT-LAP-00131", name:"ThinkPad X1 Carbon", category:"Laptops", manufacturer:"Lenovo", model:"X1 Carbon Gen 11", serialNumber:"PF3X0091", purchaseDate:"2024-01-20", warrantyExpiry:addDays(6), cost:1699, vendor:"Lenovo Direct", location:"HQ - Floor 3", status:"In Repair", assignedTo:"u_3", notes:"Screen flicker reported.", history:[{ts:"2024-01-20", text:"Asset registered"},{ts:"2024-03-02", text:"Assigned to Priya Nair"},{ts:"2025-08-01", text:"Marked In Repair — screen flicker"}]},
+      {id:"a_7", tag:"IT-SRV-00003", name:"PowerEdge R650", category:"Servers", manufacturer:"Dell", model:"PowerEdge R650", serialNumber:"PE650-7712X", purchaseDate:"2021-04-11", warrantyExpiry:addDays(-400), cost:8900, vendor:"Dell Direct", location:"Data Center - Rack 12", status:"Retired", assignedTo:null, notes:"Decommissioned, pending disposal.", history:[{ts:"2021-04-11", text:"Asset registered"},{ts:"2026-06-01", text:"Marked Retired"}]},
+      {id:"a_8", tag:"IT-KEY-00220", name:"MX Keys Combo", category:"Peripherals", manufacturer:"Logitech", model:"MX Keys + MX Master 3S", serialNumber:"LGMX-99201", purchaseDate:"2024-05-19", warrantyExpiry:addDays(280), cost:180, vendor:"Amazon Business", location:"HQ - Floor 4", status:"Assigned", assignedTo:"u_5", notes:"", history:[{ts:"2024-05-19", text:"Asset registered"},{ts:"2024-05-20", text:"Assigned to Aisha Bello"}]},
+      {id:"a_9", tag:"IT-MON-00051", name:"LG UltraFine 5K", category:"Monitors", manufacturer:"LG", model:"27MD5KL-B", serialNumber:"LG5K-30871", purchaseDate:"2024-03-08", warrantyExpiry:addDays(20), cost:1300, vendor:"Apple Business", location:"HQ - Floor 4", status:"Available", assignedTo:null, notes:"", history:[{ts:"2024-03-08", text:"Asset registered"}]},
+      {id:"a_10", tag:"IT-PHN-00312", name:"Pixel 8 Pro", category:"Mobile Devices", manufacturer:"Google", model:"Pixel 8 Pro 256GB", serialNumber:"GP8P-40012", purchaseDate:"2024-06-01", warrantyExpiry:addDays(340), cost:999, vendor:"Google Store", location:"Remote / Field", status:"Available", assignedTo:null, notes:"", history:[{ts:"2024-06-01", text:"Asset registered"}]}
+    ];
+    var assignments = [
+      {id:"as_1", assetId:"a_1", userId:"u_1", assignedDate:"2024-02-14", expectedReturn:null, actualReturn:null, status:"Active", notes:"Long-term issue."},
+      {id:"as_2", assetId:"a_4", userId:"u_2", assignedDate:"2023-10-08", expectedReturn:null, actualReturn:null, status:"Active", notes:"Field sales."},
+      {id:"as_3", assetId:"a_8", userId:"u_5", assignedDate:"2024-05-20", expectedReturn:null, actualReturn:null, status:"Active", notes:""},
+      {id:"as_4", assetId:"a_6", userId:"u_3", assignedDate:"2024-03-02", expectedReturn:null, actualReturn:null, status:"Active", notes:"Currently in repair."}
+    ];
+    var maintenance = [
+      {id:"m_1", assetId:"a_6", type:"Repair", description:"Screen flicker — panel replacement requested", scheduledDate:addDays(3), completedDate:null, status:"Scheduled", cost:null},
+      {id:"m_2", assetId:"a_5", type:"Preventive", description:"Firmware update + config audit", scheduledDate:addDays(10), completedDate:null, status:"Scheduled", cost:null},
+      {id:"m_3", assetId:"a_7", type:"Inspection", description:"Pre-disposal data wipe & inspection", scheduledDate:addDays(-20), completedDate:addDays(-18), status:"Completed", cost:0}
+    ];
+    return { categories: categories, locations: locations, users: users, assets: assets, assignments: assignments, maintenance: maintenance, activity: [
+      {ts:new Date().toISOString(), text:"Asset Ledger initialized with demo inventory."}
+    ]};
+  }
+
+  function logActivity(text){
+    state.activity.unshift({ts:new Date().toISOString(), text:text});
+    if(state.activity.length>40) state.activity.length = 40;
+  }
+
+  async function loadState(){
+    try{
+      var res = await window.storage.get(STORAGE_KEY, false);
+      if(res && res.value){ state = JSON.parse(res.value); return; }
+    }catch(e){ /* not found or error -> seed */ }
+    state = seedData();
+    await saveState();
+  }
+
+  var saveTimer = null;
+  function saveState(){
+    return new Promise(function(resolve){
+      clearTimeout(saveTimer);
+      saveTimer = setTimeout(async function(){
+        try{ await window.storage.set(STORAGE_KEY, JSON.stringify(state), false); }
+        catch(e){ console.error("Save failed", e); toast("Couldn't save changes. Retrying…", true); }
+        resolve();
+      }, 150);
+    });
+  }
+
+  function toast(msg, danger){
+    var id = uid("t");
+    ui.toasts.push({id:id, msg:msg, danger:!!danger});
+    render();
+    setTimeout(function(){
+      ui.toasts = ui.toasts.filter(function(t){return t.id!==id;});
+      render();
+    }, 3200);
+  }
+
+  /* ---------------- Derived data helpers ---------------- */
+  function getUser(id){ return state.users.find(function(u){return u.id===id;}); }
+  function getAsset(id){ return state.assets.find(function(a){return a.id===id;}); }
+  function activeAssignmentFor(assetId){ return state.assignments.find(function(x){return x.assetId===assetId && x.status==="Active";}); }
+
+  function filteredAssets(){
+    var q = ui.search.trim().toLowerCase();
+    return state.assets.filter(function(a){
+      if(ui.assetFilters.status && a.status!==ui.assetFilters.status) return false;
+      if(ui.assetFilters.category && a.category!==ui.assetFilters.category) return false;
+      if(ui.assetFilters.location && a.location!==ui.assetFilters.location) return false;
+      if(!q) return true;
+      return (a.name+" "+a.tag+" "+a.serialNumber+" "+a.manufacturer+" "+a.model).toLowerCase().indexOf(q) !== -1;
+    });
+  }
+
+  function upcomingExpiries(days){
+    return state.assets.filter(function(a){
+      var d = daysUntil(a.warrantyExpiry);
+      return d!==null && d<=days;
+    }).sort(function(a,b){ return daysUntil(a.warrantyExpiry)-daysUntil(b.warrantyExpiry); });
+  }
+
+  /* ---------------- Rendering ---------------- */
+  function el(html){ var d=document.createElement("div"); d.innerHTML=html.trim(); return d.firstChild; }
+
+  function barcodeTicks(seedStr, n){
+    var out = "";
+    var seed = 0; for(var i=0;i<seedStr.length;i++) seed += seedStr.charCodeAt(i);
+    for(var i2=0;i2<n;i2++){
+      var w = ((seed*(i2+3)) % 3) + 1;
+      out += '<span style="width:'+w+'px"></span>';
+    }
+    return out;
+  }
+
+  function tagChip(tag){
+    return '<span class="tag-chip"><span class="ticks">'+barcodeTicks(tag,5)+'</span><span class="val">'+escapeHtml(tag)+'</span></span>';
+  }
+
+  function pill(status){
+    return '<span class="pill '+statusClass(status)+'"><span class="dot"></span>'+status+'</span>';
+  }
+
+  function sidebar(){
+    var items = [
+      {id:"dashboard", label:"Dashboard", icon:ICONS.dashboard},
+      {id:"assets", label:"Assets", icon:ICONS.assets, badge: state.assets.length},
+      {id:"assignments", label:"Assignments", icon:ICONS.assign, badge: state.assignments.filter(function(a){return a.status==="Active";}).length},
+      {id:"maintenance", label:"Maintenance", icon:ICONS.maint, badge: state.maintenance.filter(function(m){return m.status==="Scheduled";}).length},
+      {id:"reports", label:"Reports", icon:ICONS.reports},
+      {id:"settings", label:"Categories & Locations", icon:ICONS.settings}
+    ];
+    return '<div id="sidebar">'+
+      '<div class="brand"><div class="brand-mark"><div class="brand-ticks">'+
+        [9,14,7,16,5,12,8].map(function(h){return '<span style="height:'+h+'px"></span>';}).join('')+
+      '</div><div class="brand-title">ASSET LEDGER</div></div><div class="brand-sub">IT Inventory Console</div></div>'+
+      '<nav class="navlist">'+
+        items.map(function(it){
+          return '<div class="navitem '+(ui.view===it.id?'active':'')+'" data-nav="'+it.id+'">'+it.icon+'<span>'+it.label+'</span>'+
+            (it.badge!==undefined ? '<span class="nav-badge">'+it.badge+'</span>' : '')+'</div>';
+        }).join('')+
+      '</nav>'+
+      '<div class="sidebar-foot">v1.0.0 · '+state.assets.length+' assets tracked</div>'+
+    '</div>';
+  }
+
+  function topbar(){
+    var placeholderMap = {dashboard:"Search assets, tags, serials…", assets:"Search by name, tag, serial…"};
+    return '<div id="topbar">'+
+      '<div class="searchbox">'+ICONS.search+'<input id="global-search" placeholder="Search assets, tags, serial numbers…" value="'+escapeHtml(ui.search)+'"/></div>'+
+      '<div class="topbar-spacer"></div>'+
+      '<button class="btn btn-primary" data-open-modal="asset">'+ICONS.plus+' New Asset</button>'+
+    '</div>';
+  }
+
+  function viewDashboard(){
+    var byStatus = {}; STATUS_LIST.forEach(function(s){byStatus[s]=0;});
+    state.assets.forEach(function(a){ byStatus[a.status] = (byStatus[a.status]||0)+1; });
+    var maxStatus = Math.max.apply(null, Object.values(byStatus).concat([1]));
+
+    var byCat = {};
+    state.assets.forEach(function(a){ byCat[a.category] = (byCat[a.category]||0)+1; });
+    var maxCat = Math.max.apply(null, Object.values(byCat).concat([1]));
+
+    var totalValue = state.assets.reduce(function(sum,a){ return sum + (Number(a.cost)||0); }, 0);
+    var expiring30 = upcomingExpiries(30).length;
+    var activeAssignments = state.assignments.filter(function(a){return a.status==="Active";}).length;
+
+    var kpis = [
+      {label:"Total Assets", value: state.assets.length, sub: state.categories.length+" categories", color:"var(--accent)"},
+      {label:"Available", value: byStatus["Available"], sub: "ready to deploy", color:"var(--accent)"},
+      {label:"Assigned", value: byStatus["Assigned"], sub: activeAssignments+" active checkouts", color:"var(--info)"},
+      {label:"In Repair", value: byStatus["In Repair"], sub: state.maintenance.filter(function(m){return m.status==="Scheduled";}).length+" open work orders", color:"var(--warn)"},
+      {label:"Warranty Expiring", value: expiring30, sub: "within 30 days", color: expiring30>0 ? "var(--danger)" : "var(--accent)"},
+      {label:"Fleet Value", value: "$"+Math.round(totalValue/1000)+"k", sub: "purchase cost total", color:"var(--accent)"}
+    ];
+
+    return '<div class="view-title"><div><h1>Dashboard</h1><p>Live snapshot of your IT asset fleet.</p></div></div>'+
+      '<div class="kpi-grid">'+ kpis.map(function(k){
+        return '<div class="kpi"><div class="accentbar" style="background:'+k.color+'"></div>'+
+          '<div class="label">'+k.label+'</div><div class="value">'+k.value+'</div><div class="sub">'+k.sub+'</div></div>';
+      }).join('') +'</div>'+
+      '<div class="grid-2">'+
+        '<div class="panel"><h3>Assets by Status</h3>'+
+          STATUS_LIST.map(function(s){
+            var v = byStatus[s]||0;
+            return '<div class="barrow"><div class="barlabel">'+s+'</div><div class="bartrack"><div class="barfill" style="width:'+(v/maxStatus*100)+'%;background:'+statusColor(s)+'"></div></div><div class="barval">'+v+'</div></div>';
+          }).join('') +
+          '<div class="section-label" style="margin-top:22px;">By Category</div>'+
+          Object.keys(byCat).map(function(c){
+            var v = byCat[c];
+            return '<div class="barrow"><div class="barlabel">'+c+'</div><div class="bartrack"><div class="barfill" style="width:'+(v/maxCat*100)+'%;background:var(--accent-dim)"></div></div><div class="barval">'+v+'</div></div>';
+          }).join('') +
+        '</div>'+
+        '<div>'+
+          '<div class="panel" style="margin-bottom:16px;"><h3>Warranty Watch <span class="count">next 30 days</span></h3>'+
+            (upcomingExpiries(30).length===0 ? '<div style="color:var(--text-faint);font-size:12.5px;">Nothing expiring soon. All clear.</div>' :
+              upcomingExpiries(30).slice(0,6).map(function(a){
+                var d = daysUntil(a.warrantyExpiry);
+                var col = d<0 ? "var(--danger)" : (d<=7 ? "var(--warn)" : "var(--text-dim)");
+                return '<div class="expiry-item"><span>'+escapeHtml(a.name)+'</span><span class="mono" style="color:'+col+'">'+(d<0 ? Math.abs(d)+"d overdue" : d+"d left")+'</span></div>';
+              }).join('')) +
+          '</div>'+
+          '<div class="panel"><h3>Recent Activity</h3>'+
+            state.activity.slice(0,8).map(function(a){
+              return '<div class="activity-item"><div class="activity-dot"></div><div><div>'+escapeHtml(a.text)+'</div><div class="t">'+fmtDate(a.ts)+'</div></div></div>';
+            }).join('') +
+          '</div>'+
+        '</div>'+
+      '</div>';
+  }
+
+  function viewAssets(){
+    var list = filteredAssets();
+    return '<div class="view-title"><div><h1>Assets</h1><p>'+list.length+' of '+state.assets.length+' assets</p></div>'+
+      '<button class="btn btn-primary" data-open-modal="asset">'+ICONS.plus+' New Asset</button></div>'+
+      '<div class="filters">'+
+        selectHtml("f-status", ["","Available","Assigned","In Repair","Retired","Disposed"], ui.assetFilters.status, "Status")+
+        selectHtml("f-category", [""].concat(state.categories.map(function(c){return c.name;})), ui.assetFilters.category, "Category")+
+        selectHtml("f-location", [""].concat(state.locations.map(function(l){return l.name;})), ui.assetFilters.location, "Location")+
+        (ui.assetFilters.status||ui.assetFilters.category||ui.assetFilters.location ? '<button class="btn btn-ghost btn-sm" id="clear-filters">Clear filters</button>' : '')+
+      '</div>'+
+      '<div class="table-wrap"><table><thead><tr>'+
+        '<th>Asset</th><th>Tag</th><th>Category</th><th>Location</th><th>Assigned To</th><th>Status</th><th>Warranty</th>'+
+      '</tr></thead><tbody>'+
+      (list.length===0 ? '<tr class="empty-row"><td colspan="7">No assets match your filters.</td></tr>' :
+        list.map(function(a){
+          var u = a.assignedTo ? getUser(a.assignedTo) : null;
+          var dLeft = daysUntil(a.warrantyExpiry);
+          var wcolor = dLeft===null ? "var(--text-faint)" : (dLeft<0 ? "var(--danger)" : dLeft<=30 ? "var(--warn)" : "var(--text-dim)");
+          return '<tr data-open-drawer="'+a.id+'">'+
+            '<td><div class="name-cell"><span class="nm">'+escapeHtml(a.name)+'</span><span class="mm">'+escapeHtml(a.manufacturer)+' · '+escapeHtml(a.model)+'</span></div></td>'+
+            '<td>'+tagChip(a.tag)+'</td>'+
+            '<td>'+escapeHtml(a.category)+'</td>'+
+            '<td>'+escapeHtml(a.location)+'</td>'+
+            '<td>'+(u ? escapeHtml(u.name) : '<span style="color:var(--text-faint)">—</span>')+'</td>'+
+            '<td>'+pill(a.status)+'</td>'+
+            '<td class="mono" style="color:'+wcolor+';font-size:11.5px;">'+fmtDate(a.warrantyExpiry)+'</td>'+
+          '</tr>';
+        }).join('')
+      )+
+      '</tbody></table></div>';
+  }
+
+  function selectHtml(id, options, val, placeholder){
+    return '<select id="'+id+'">'+options.map(function(o){
+      return '<option value="'+escapeHtml(o)+'" '+(o===val?'selected':'')+'>'+(o===""?"All "+placeholder+"s":escapeHtml(o))+'</option>';
+    }).join('')+'</select>';
+  }
+
+  function viewAssignments(){
+    var active = state.assignments.filter(function(a){return a.status==="Active";});
+    var past = state.assignments.filter(function(a){return a.status!=="Active";});
+    return '<div class="view-title"><div><h1>Assignments</h1><p>'+active.length+' active checkouts</p></div>'+
+      '<button class="btn btn-primary" data-open-modal="assignment">'+ICONS.plus+' New Checkout</button></div>'+
+      '<div class="table-wrap"><table><thead><tr><th>Asset</th><th>Assigned To</th><th>Checked Out</th><th>Expected Return</th><th>Status</th><th></th></tr></thead><tbody>'+
+      (active.length===0 ? '<tr class="empty-row"><td colspan="6">No active assignments.</td></tr>' :
+        active.map(function(as){
+          var asset = getAsset(as.assetId); var u = getUser(as.userId);
+          if(!asset||!u) return '';
+          return '<tr><td><div class="name-cell"><span class="nm">'+escapeHtml(asset.name)+'</span><span class="mm">'+tagChip(asset.tag)+'</span></div></td>'+
+            '<td>'+escapeHtml(u.name)+'<div style="color:var(--text-faint);font-size:11px;">'+escapeHtml(u.department)+'</div></td>'+
+            '<td class="mono" style="font-size:12px;">'+fmtDate(as.assignedDate)+'</td>'+
+            '<td class="mono" style="font-size:12px;">'+(as.expectedReturn?fmtDate(as.expectedReturn):'—')+'</td>'+
+            '<td>'+pill('Assigned')+'</td>'+
+            '<td style="text-align:right;"><button class="btn btn-sm" data-checkin="'+as.id+'">Check In</button></td></tr>';
+        }).join('')
+      )+
+      '</tbody></table></div>'+
+      (past.length ? '<div class="section-label" style="margin-top:24px;">Past Assignments</div><div class="table-wrap"><table><thead><tr><th>Asset</th><th>Assigned To</th><th>Checked Out</th><th>Returned</th></tr></thead><tbody>'+
+        past.slice(0,15).map(function(as){
+          var asset=getAsset(as.assetId); var u=getUser(as.userId);
+          if(!asset||!u) return '';
+          return '<tr><td>'+escapeHtml(asset.name)+'</td><td>'+escapeHtml(u.name)+'</td><td class="mono" style="font-size:12px;">'+fmtDate(as.assignedDate)+'</td><td class="mono" style="font-size:12px;">'+fmtDate(as.actualReturn)+'</td></tr>';
+        }).join('')+'</tbody></table></div>' : '');
+  }
+
+  function viewMaintenance(){
+    var scheduled = state.maintenance.filter(function(m){return m.status==="Scheduled";});
+    var completed = state.maintenance.filter(function(m){return m.status==="Completed";});
+    function row(m){
+      var asset = getAsset(m.assetId);
+      return '<tr><td><div class="name-cell"><span class="nm">'+(asset?escapeHtml(asset.name):'—')+'</span><span class="mm">'+(asset?tagChip(asset.tag):'')+'</span></div></td>'+
+        '<td>'+escapeHtml(m.type)+'</td><td style="max-width:260px;">'+escapeHtml(m.description)+'</td>'+
+        '<td class="mono" style="font-size:12px;">'+fmtDate(m.scheduledDate)+'</td>'+
+        '<td>'+(m.status==="Completed"?pill('Retired').replace('Retired','Completed').replace('pill-retired','pill-available'):pill('In Repair').replace('In Repair','Scheduled'))+'</td>'+
+        (m.status==="Scheduled" ? '<td style="text-align:right;"><button class="btn btn-sm" data-complete-maint="'+m.id+'">Mark Complete</button></td>' : '<td></td>')+
+      '</tr>';
+    }
+    return '<div class="view-title"><div><h1>Maintenance</h1><p>'+scheduled.length+' scheduled work orders</p></div>'+
+      '<button class="btn btn-primary" data-open-modal="maintenance">'+ICONS.plus+' New Work Order</button></div>'+
+      '<div class="table-wrap"><table><thead><tr><th>Asset</th><th>Type</th><th>Description</th><th>Scheduled</th><th>Status</th><th></th></tr></thead><tbody>'+
+      (scheduled.length===0 && completed.length===0 ? '<tr class="empty-row"><td colspan="6">No maintenance records yet.</td></tr>' :
+        scheduled.map(row).join('') + completed.map(row).join(''))+
+      '</tbody></table></div>';
+  }
+
+  function viewSettings(){
+    return '<div class="view-title"><div><h1>Categories &amp; Locations</h1><p>Manage the taxonomy used across your inventory.</p></div></div>'+
+      '<div class="grid-2">'+
+        '<div class="panel"><h3>Categories <span class="count">'+state.categories.length+'</span></h3>'+
+          state.categories.map(function(c){
+            var count = state.assets.filter(function(a){return a.category===c.name;}).length;
+            return '<div class="list-row"><span>'+escapeHtml(c.name)+' <span style="color:var(--text-faint);font-size:11.5px;">('+count+' assets)</span></span>'+
+              '<button class="btn btn-ghost btn-sm btn-danger" data-del-category="'+c.id+'">'+ICONS.trash+'</button></div>';
+          }).join('')+
+          '<div style="display:flex;gap:8px;margin-top:14px;"><input class="input" id="new-cat-name" placeholder="New category name" style="flex:1;"/><button class="btn btn-sm" id="add-cat">'+ICONS.plus+' Add</button></div>'+
+        '</div>'+
+        '<div class="panel"><h3>Locations <span class="count">'+state.locations.length+'</span></h3>'+
+          state.locations.map(function(l){
+            var count = state.assets.filter(function(a){return a.location===l.name;}).length;
+            return '<div class="list-row"><span>'+escapeHtml(l.name)+' <span style="color:var(--text-faint);font-size:11.5px;">('+count+' assets)</span></span>'+
+              '<button class="btn btn-ghost btn-sm btn-danger" data-del-location="'+l.id+'">'+ICONS.trash+'</button></div>';
+          }).join('')+
+          '<div style="display:flex;gap:8px;margin-top:14px;"><input class="input" id="new-loc-name" placeholder="New location name" style="flex:1;"/><button class="btn btn-sm" id="add-loc">'+ICONS.plus+' Add</button></div>'+
+        '</div>'+
+      '</div>';
+  }
+
+  function viewReports(){
+    var tabs = [{id:"summary",label:"Summary"},{id:"warranty",label:"Warranty"},{id:"value",label:"Depreciation"}];
+    var body = "";
+    if(ui.reportsTab==="summary"){
+      body = '<div class="table-wrap"><table><thead><tr><th>Category</th><th>Total</th><th>Available</th><th>Assigned</th><th>In Repair</th><th>Retired/Disposed</th></tr></thead><tbody>'+
+        state.categories.map(function(c){
+          var list = state.assets.filter(function(a){return a.category===c.name;});
+          function n(s){ return list.filter(function(a){return a.status===s;}).length; }
+          return '<tr><td>'+escapeHtml(c.name)+'</td><td class="mono">'+list.length+'</td><td class="mono">'+n("Available")+'</td><td class="mono">'+n("Assigned")+'</td><td class="mono">'+n("In Repair")+'</td><td class="mono">'+(n("Retired")+n("Disposed"))+'</td></tr>';
+        }).join('')+'</tbody></table></div>';
+    } else if(ui.reportsTab==="warranty"){
+      var exp = upcomingExpiries(9999).sort(function(a,b){return new Date(a.warrantyExpiry)-new Date(b.warrantyExpiry);});
+      body = '<div class="table-wrap"><table><thead><tr><th>Asset</th><th>Tag</th><th>Location</th><th>Warranty Expiry</th><th>Status</th></tr></thead><tbody>'+
+        (exp.length===0 ? '<tr class="empty-row"><td colspan="5">No warranty data.</td></tr>' :
+        exp.map(function(a){
+          var d = daysUntil(a.warrantyExpiry);
+          var col = d<0 ? "var(--danger)" : d<=30 ? "var(--warn)" : "var(--text-dim)";
+          return '<tr><td>'+escapeHtml(a.name)+'</td><td>'+tagChip(a.tag)+'</td><td>'+escapeHtml(a.location)+'</td><td class="mono" style="color:'+col+'">'+fmtDate(a.warrantyExpiry)+' ('+(d<0?Math.abs(d)+'d overdue':d+'d left')+')</td><td>'+pill(a.status)+'</td></tr>';
+        }).join(''))+'</tbody></table></div>';
+    } else {
+      var totalCost = state.assets.reduce(function(s,a){return s+(Number(a.cost)||0);},0);
+      body = '<div class="table-wrap"><table><thead><tr><th>Asset</th><th>Tag</th><th>Purchase Date</th><th>Cost</th><th>Age</th></tr></thead><tbody>'+
+        state.assets.map(function(a){
+          var years = a.purchaseDate ? ((new Date()-new Date(a.purchaseDate))/(365*86400000)).toFixed(1) : "—";
+          return '<tr><td>'+escapeHtml(a.name)+'</td><td>'+tagChip(a.tag)+'</td><td class="mono" style="font-size:12px;">'+fmtDate(a.purchaseDate)+'</td><td class="mono">'+fmtMoney(a.cost)+'</td><td class="mono">'+years+' yrs</td></tr>';
+        }).join('')+'</tbody></table></div>'+
+        '<div class="conf-box" style="margin-top:14px;">Total purchase cost across fleet: <strong class="mono">'+fmtMoney(totalCost)+'</strong></div>';
+    }
+    return '<div class="view-title"><div><h1>Reports</h1><p>Export-ready views of your inventory data.</p></div>'+
+      '<button class="btn" id="export-csv">Export CSV</button></div>'+
+      '<div class="subtabs">'+tabs.map(function(t){return '<div class="subtab '+(ui.reportsTab===t.id?'active':'')+'" data-rtab="'+t.id+'">'+t.label+'</div>';}).join('')+'</div>'+
+      body;
+  }
+
+  function assetDrawer(){
+    if(!ui.drawerAssetId) return "";
+    var a = getAsset(ui.drawerAssetId);
+    if(!a) return "";
+    var u = a.assignedTo ? getUser(a.assignedTo) : null;
+    var dLeft = daysUntil(a.warrantyExpiry);
+    return '<div class="drawer-overlay" data-close-drawer="1"></div>'+
+      '<div class="drawer">'+
+        '<div class="drawer-head"><div>'+
+          '<h2 style="margin:0 0 6px;font-size:18px;">'+escapeHtml(a.name)+'</h2>'+
+          tagChip(a.tag)+
+        '</div><div class="close-x" data-close-drawer="1">'+ICONS.close+'</div></div>'+
+        '<div class="drawer-body">'+
+          '<div class="barcode-visual">'+barcodeTicks(a.serialNumber||a.tag, 34).replace(/width:(\d+)px/g,function(m,w){return 'width:'+w+'px;';})+'</div>'+
+          '<div style="display:flex;gap:8px;margin-bottom:6px;">'+pill(a.status)+
+            (dLeft!==null && dLeft<30 ? '<span class="pill" style="background:var(--warn-glow);color:var(--warn);"><span class="dot" style="background:var(--warn)"></span>Warranty '+(dLeft<0?'expired':dLeft+'d left')+'</span>' : '')+
+          '</div>'+
+          '<div class="section-label">Details</div>'+
+          '<div class="detail-row"><span class="k">Manufacturer</span><span class="v">'+escapeHtml(a.manufacturer)+'</span></div>'+
+          '<div class="detail-row"><span class="k">Model</span><span class="v">'+escapeHtml(a.model)+'</span></div>'+
+          '<div class="detail-row"><span class="k">Serial Number</span><span class="v mono">'+escapeHtml(a.serialNumber)+'</span></div>'+
+          '<div class="detail-row"><span class="k">Category</span><span class="v">'+escapeHtml(a.category)+'</span></div>'+
+          '<div class="detail-row"><span class="k">Location</span><span class="v">'+escapeHtml(a.location)+'</span></div>'+
+          '<div class="detail-row"><span class="k">Assigned To</span><span class="v">'+(u?escapeHtml(u.name):'—')+'</span></div>'+
+          '<div class="detail-row"><span class="k">Purchase Date</span><span class="v">'+fmtDate(a.purchaseDate)+'</span></div>'+
+          '<div class="detail-row"><span class="k">Warranty Expiry</span><span class="v">'+fmtDate(a.warrantyExpiry)+'</span></div>'+
+          '<div class="detail-row"><span class="k">Purchase Cost</span><span class="v">'+fmtMoney(a.cost)+'</span></div>'+
+          '<div class="detail-row"><span class="k">Vendor</span><span class="v">'+escapeHtml(a.vendor||'—')+'</span></div>'+
+          (a.notes ? '<div class="section-label">Notes</div><div style="font-size:12.5px;color:var(--text-dim);">'+escapeHtml(a.notes)+'</div>' : '')+
+          '<div class="section-label">History</div>'+
+          (a.history||[]).slice().reverse().map(function(h){
+            return '<div class="activity-item"><div class="activity-dot"></div><div><div>'+escapeHtml(h.text)+'</div><div class="t">'+fmtDate(h.ts)+'</div></div></div>';
+          }).join('')+
+          '<div style="display:flex;gap:8px;margin-top:22px;flex-wrap:wrap;">'+
+            '<button class="btn btn-sm" data-edit-asset="'+a.id+'">'+ICONS.edit+' Edit</button>'+
+            (a.status==="Available" ? '<button class="btn btn-sm btn-primary" data-quick-assign="'+a.id+'">'+ICONS.assign+' Assign</button>' : '')+
+            (a.status==="Assigned" ? '<button class="btn btn-sm" data-quick-return="'+a.id+'">Check In</button>' : '')+
+            (a.status!=="In Repair" && a.status!=="Retired" && a.status!=="Disposed" ? '<button class="btn btn-sm" data-set-status="'+a.id+'|In Repair">Send to Repair</button>' : '')+
+            (a.status!=="Retired" ? '<button class="btn btn-sm" data-set-status="'+a.id+'|Retired">Retire</button>' : '')+
+            '<button class="btn btn-sm btn-danger" data-delete-asset="'+a.id+'">'+ICONS.trash+' Delete</button>'+
+          '</div>'+
+        '</div>'+
+      '</div>';
+  }
+
+  /* ---------------- Modals ---------------- */
+  function modalWrap(title, bodyHtml, footHtml){
+    return '<div class="overlay" data-close-modal-bg="1"><div class="modal">'+
+      '<div class="modal-head"><h3>'+title+'</h3><div class="close-x" data-close-modal="1">'+ICONS.close+'</div></div>'+
+      '<div class="modal-body">'+bodyHtml+'</div>'+
+      '<div class="modal-foot">'+footHtml+'</div>'+
+    '</div></div>';
+  }
+
+  function modalAsset(){
+    var editing = ui.modal.editId ? getAsset(ui.modal.editId) : null;
+    var a = editing || {name:"",tag:"IT-"+String(state.assets.length+1).padStart(5,'0'),category:state.categories[0]?state.categories[0].name:"",manufacturer:"",model:"",serialNumber:"",purchaseDate:"",warrantyExpiry:"",cost:"",vendor:"",location:state.locations[0]?state.locations[0].name:"",status:"Available",notes:""};
+    return modalWrap(editing? "Edit Asset" : "New Asset",
+      '<div class="field-row"><div class="field"><label>Asset Name</label><input id="f-name" value="'+escapeHtml(a.name)+'" placeholder="Dell Latitude 7440"/></div>'+
+      '<div class="field"><label>Asset Tag</label><input id="f-tag" class="mono" value="'+escapeHtml(a.tag)+'"/></div></div>'+
+      '<div class="field-row"><div class="field"><label>Manufacturer</label><input id="f-manufacturer" value="'+escapeHtml(a.manufacturer)+'"/></div>'+
+      '<div class="field"><label>Model</label><input id="f-model" value="'+escapeHtml(a.model)+'"/></div></div>'+
+      '<div class="field"><label>Serial Number</label><input id="f-serial" class="mono" value="'+escapeHtml(a.serialNumber)+'"/></div>'+
+      '<div class="field-row"><div class="field"><label>Category</label><select id="f-category">'+state.categories.map(function(c){return '<option '+(c.name===a.category?'selected':'')+'>'+escapeHtml(c.name)+'</option>';}).join('')+'</select></div>'+
+      '<div class="field"><label>Location</label><select id="f-location">'+state.locations.map(function(l){return '<option '+(l.name===a.location?'selected':'')+'>'+escapeHtml(l.name)+'</option>';}).join('')+'</select></div></div>'+
+      '<div class="field-row"><div class="field"><label>Purchase Date</label><input type="date" id="f-purchase" value="'+(a.purchaseDate||'')+'"/></div>'+
+      '<div class="field"><label>Warranty Expiry</label><input type="date" id="f-warranty" value="'+(a.warrantyExpiry||'')+'"/></div></div>'+
+      '<div class="field-row"><div class="field"><label>Purchase Cost (USD)</label><input type="number" step="0.01" id="f-cost" value="'+(a.cost!==undefined?a.cost:'')+'"/></div>'+
+      '<div class="field"><label>Vendor</label><input id="f-vendor" value="'+escapeHtml(a.vendor||'')+'"/></div></div>'+
+      '<div class="field"><label>Notes</label><textarea id="f-notes">'+escapeHtml(a.notes||'')+'</textarea></div>',
+      '<button class="btn btn-ghost" data-close-modal="1">Cancel</button>'+
+      '<button class="btn btn-primary" id="save-asset">'+(editing?'Save Changes':'Create Asset')+'</button>'
+    );
+  }
+
+  function modalAssignment(){
+    var available = state.assets.filter(function(a){return a.status==="Available";});
+    return modalWrap("New Checkout",
+      (available.length===0 ? '<div class="conf-box">No available assets to check out right now.</div>' :
+      '<div class="field"><label>Asset</label><select id="f-asset">'+available.map(function(a){return '<option value="'+a.id+'">'+escapeHtml(a.name)+' — '+escapeHtml(a.tag)+'</option>';}).join('')+'</select></div>'+
+      '<div class="field"><label>Assign To</label><select id="f-user">'+state.users.map(function(u){return '<option value="'+u.id+'">'+escapeHtml(u.name)+' ('+escapeHtml(u.department)+')</option>';}).join('')+'</select></div>'+
+      '<div class="field-row"><div class="field"><label>Checkout Date</label><input type="date" id="f-adate" value="'+new Date().toISOString().slice(0,10)+'"/></div>'+
+      '<div class="field"><label>Expected Return</label><input type="date" id="f-rdate"/></div></div>'+
+      '<div class="field"><label>Notes</label><textarea id="f-anotes" placeholder="Optional"></textarea></div>'),
+      '<button class="btn btn-ghost" data-close-modal="1">Cancel</button>'+
+      (available.length>0 ? '<button class="btn btn-primary" id="save-assignment">Check Out</button>' : '')
+    );
+  }
+
+  function modalMaintenance(){
+    return modalWrap("New Work Order",
+      '<div class="field"><label>Asset</label><select id="f-masset">'+state.assets.map(function(a){return '<option value="'+a.id+'">'+escapeHtml(a.name)+' — '+escapeHtml(a.tag)+'</option>';}).join('')+'</select></div>'+
+      '<div class="field"><label>Type</label><select id="f-mtype"><option>Repair</option><option>Preventive</option><option>Inspection</option></select></div>'+
+      '<div class="field"><label>Description</label><textarea id="f-mdesc" placeholder="What needs to be done?"></textarea></div>'+
+      '<div class="field"><label>Scheduled Date</label><input type="date" id="f-mdate" value="'+new Date().toISOString().slice(0,10)+'"/></div>',
+      '<button class="btn btn-ghost" data-close-modal="1">Cancel</button>'+
+      '<button class="btn btn-primary" id="save-maintenance">Create Work Order</button>'
+    );
+  }
+
+  function modalConfirm(){
+    var m = ui.modal;
+    return modalWrap(m.title, '<div class="conf-box">'+m.message+'</div>',
+      '<button class="btn btn-ghost" data-close-modal="1">Cancel</button>'+
+      '<button class="btn btn-danger" id="confirm-yes">'+m.confirmLabel+'</button>'
+    );
+  }
+
+  function renderModal(){
+    if(!ui.modal) return "";
+    if(ui.modal.type==="asset") return modalAsset();
+    if(ui.modal.type==="assignment") return modalAssignment();
+    if(ui.modal.type==="maintenance") return modalMaintenance();
+    if(ui.modal.type==="confirm") return modalConfirm();
+    return "";
+  }
+
+  function renderToasts(){
+    return '<div class="toast-wrap">'+ui.toasts.map(function(t){
+      return '<div class="toast '+(t.danger?'danger':'')+'">'+escapeHtml(t.msg)+'</div>';
+    }).join('')+'</div>';
+  }
+
+  function currentViewHtml(){
+    if(ui.view==="dashboard") return viewDashboard();
+    if(ui.view==="assets") return viewAssets();
+    if(ui.view==="assignments") return viewAssignments();
+    if(ui.view==="maintenance") return viewMaintenance();
+    if(ui.view==="reports") return viewReports();
+    if(ui.view==="settings") return viewSettings();
+    return "";
+  }
+
+  function render(){
+    var root = document.getElementById("root");
+    root.innerHTML = sidebar() +
+      '<div id="main">' + topbar() + '<div id="content">' + currentViewHtml() + '</div></div>' +
+      assetDrawer() + renderModal() + renderToasts();
+    bindEvents();
+    var searchInput = document.getElementById("global-search");
+    if(searchInput){
+      searchInput.focus();
+      var val = searchInput.value; searchInput.value=""; searchInput.value = val;
+    }
+  }
+
+  /* ---------------- Actions ---------------- */
+  function openModal(type, opts){ ui.modal = Object.assign({type:type}, opts||{}); render(); }
+  function closeModal(){ ui.modal = null; render(); }
+
+  function createOrUpdateAsset(){
+    var name = document.getElementById("f-name").value.trim();
+    var tag = document.getElementById("f-tag").value.trim();
+    if(!name || !tag){ toast("Asset name and tag are required.", true); return; }
+    var data = {
+      name:name, tag:tag,
+      manufacturer:document.getElementById("f-manufacturer").value.trim(),
+      model:document.getElementById("f-model").value.trim(),
+      serialNumber:document.getElementById("f-serial").value.trim(),
+      category:document.getElementById("f-category").value,
+      location:document.getElementById("f-location").value,
+      purchaseDate:document.getElementById("f-purchase").value,
+      warrantyExpiry:document.getElementById("f-warranty").value,
+      cost:document.getElementById("f-cost").value,
+      vendor:document.getElementById("f-vendor").value.trim(),
+      notes:document.getElementById("f-notes").value.trim()
+    };
+    if(ui.modal.editId){
+      var a = getAsset(ui.modal.editId);
+      Object.assign(a, data);
+      a.history.push({ts:new Date().toISOString(), text:"Asset details updated"});
+      logActivity("Updated asset "+a.name);
+      toast("Asset updated.");
+    } else {
+      var newAsset = Object.assign({id:uid("a"), status:"Available", assignedTo:null, history:[{ts:new Date().toISOString(), text:"Asset registered"}]}, data);
+      state.assets.unshift(newAsset);
+      logActivity("Registered new asset "+newAsset.name);
+      toast("Asset created.");
+    }
+    saveState();
+    closeModal();
+  }
+
+  function createAssignment(){
+    var assetId = document.getElementById("f-asset").value;
+    var userId = document.getElementById("f-user").value;
+    var adate = document.getElementById("f-adate").value;
+    var rdate = document.getElementById("f-rdate").value;
+    var notes = document.getElementById("f-anotes").value.trim();
+    var asset = getAsset(assetId); var user = getUser(userId);
+    if(!asset || !user){ toast("Select an asset and a user.", true); return; }
+    state.assignments.unshift({id:uid("as"), assetId:assetId, userId:userId, assignedDate:adate, expectedReturn:rdate||null, actualReturn:null, status:"Active", notes:notes});
+    asset.status = "Assigned"; asset.assignedTo = userId;
+    asset.history.push({ts:new Date().toISOString(), text:"Assigned to "+user.name});
+    logActivity(asset.name+" checked out to "+user.name);
+    toast("Asset checked out to "+user.name+".");
+    saveState(); closeModal();
+  }
+
+  function checkInAssignment(assignId){
+    var as = state.assignments.find(function(x){return x.id===assignId;});
+    if(!as) return;
+    as.status = "Returned"; as.actualReturn = new Date().toISOString().slice(0,10);
+    var asset = getAsset(as.assetId);
+    if(asset){ asset.status="Available"; asset.assignedTo=null; asset.history.push({ts:new Date().toISOString(), text:"Checked in — now available"}); logActivity(asset.name+" checked in"); }
+    toast("Asset checked in.");
+    saveState(); render();
+  }
+
+  function createMaintenance(){
+    var assetId = document.getElementById("f-masset").value;
+    var type = document.getElementById("f-mtype").value;
+    var desc = document.getElementById("f-mdesc").value.trim();
+    var date = document.getElementById("f-mdate").value;
+    var asset = getAsset(assetId);
+    if(!asset || !desc){ toast("Please fill in the description.", true); return; }
+    state.maintenance.unshift({id:uid("m"), assetId:assetId, type:type, description:desc, scheduledDate:date, completedDate:null, status:"Scheduled", cost:null});
+    asset.history.push({ts:new Date().toISOString(), text:type+" work order created"});
+    logActivity(type+" work order created for "+asset.name);
+    toast("Work order created.");
+    saveState(); closeModal();
+  }
+
+  function completeMaintenance(id){
+    var m = state.maintenance.find(function(x){return x.id===id;});
+    if(!m) return;
+    m.status = "Completed"; m.completedDate = new Date().toISOString().slice(0,10);
+    logActivity("Maintenance completed for "+(getAsset(m.assetId)||{}).name);
+    toast("Work order marked complete.");
+    saveState(); render();
+  }
+
+  function setAssetStatus(assetId, status){
+    var a = getAsset(assetId);
+    if(!a) return;
+    a.status = status;
+    if(status!=="Assigned"){
+      var act = activeAssignmentFor(assetId);
+      if(act){ act.status="Returned"; act.actualReturn=new Date().toISOString().slice(0,10); }
+      a.assignedTo=null;
+    }
+    a.history.push({ts:new Date().toISOString(), text:"Status changed to "+status});
+    logActivity(a.name+" marked "+status);
+    toast(a.name+" marked "+status+".");
+    saveState(); render();
+  }
+
+  function deleteAsset(assetId){
+    var a = getAsset(assetId);
+    state.assets = state.assets.filter(function(x){return x.id!==assetId;});
+    state.assignments = state.assignments.filter(function(x){return x.assetId!==assetId;});
+    state.maintenance = state.maintenance.filter(function(x){return x.assetId!==assetId;});
+    logActivity("Deleted asset "+(a?a.name:""));
+    toast("Asset deleted.", true);
+    ui.drawerAssetId = null;
+    saveState(); render();
+  }
+
+  function exportCsv(){
+    var rows = [["Tag","Name","Category","Manufacturer","Model","Serial","Location","Status","Assigned To","Purchase Date","Warranty Expiry","Cost"]];
+    state.assets.forEach(function(a){
+      var u = a.assignedTo ? getUser(a.assignedTo) : null;
+      rows.push([a.tag,a.name,a.category,a.manufacturer,a.model,a.serialNumber,a.location,a.status,u?u.name:"",a.purchaseDate,a.warrantyExpiry,a.cost]);
+    });
+    var csv = rows.map(function(r){ return r.map(function(c){ return '"'+String(c==null?"":c).replace(/"/g,'""')+'"'; }).join(','); }).join('\n');
+    var blob = new Blob([csv], {type:"text/csv"});
+    var url = URL.createObjectURL(blob);
+    var link = document.createElement("a");
+    link.href = url; link.download = "asset-inventory-export.csv";
+    document.body.appendChild(link); link.click(); document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    toast("CSV export downloaded.");
+  }
+
+  /* ---------------- Event binding ---------------- */
+  function bindEvents(){
+    document.querySelectorAll("[data-nav]").forEach(function(elm){
+      elm.onclick = function(){ ui.view = elm.getAttribute("data-nav"); ui.drawerAssetId=null; render(); };
+    });
+    var gs = document.getElementById("global-search");
+    if(gs) gs.oninput = function(){ ui.search = gs.value; if(ui.view!=="assets") ui.view="assets"; render(); };
+
+    document.querySelectorAll("[data-open-modal]").forEach(function(elm){
+      elm.onclick = function(){ openModal(elm.getAttribute("data-open-modal")); };
+    });
+    document.querySelectorAll("[data-close-modal],[data-close-modal-bg]").forEach(function(elm){
+      elm.onclick = function(e){ if(e.target===elm) closeModal(); };
+    });
+
+    document.querySelectorAll("[data-open-drawer]").forEach(function(elm){
+      elm.onclick = function(){ ui.drawerAssetId = elm.getAttribute("data-open-drawer"); render(); };
+    });
+    document.querySelectorAll("[data-close-drawer]").forEach(function(elm){
+      elm.onclick = function(e){ if(e.target===elm){ ui.drawerAssetId=null; render(); } };
+    });
+
+    var saveAssetBtn = document.getElementById("save-asset");
+    if(saveAssetBtn) saveAssetBtn.onclick = createOrUpdateAsset;
+    var saveAssignBtn = document.getElementById("save-assignment");
+    if(saveAssignBtn) saveAssignBtn.onclick = createAssignment;
+    var saveMaintBtn = document.getElementById("save-maintenance");
+    if(saveMaintBtn) saveMaintBtn.onclick = createMaintenance;
+
+    document.querySelectorAll("[data-checkin]").forEach(function(elm){
+      elm.onclick = function(){ checkInAssignment(elm.getAttribute("data-checkin")); };
+    });
+    document.querySelectorAll("[data-complete-maint]").forEach(function(elm){
+      elm.onclick = function(){ completeMaintenance(elm.getAttribute("data-complete-maint")); };
+    });
+
+    document.querySelectorAll("[data-edit-asset]").forEach(function(elm){
+      elm.onclick = function(){ openModal("asset", {editId: elm.getAttribute("data-edit-asset")}); };
+    });
+    document.querySelectorAll("[data-quick-assign]").forEach(function(elm){
+      elm.onclick = function(){ openModal("assignment"); };
+    });
+    document.querySelectorAll("[data-quick-return]").forEach(function(elm){
+      elm.onclick = function(){
+        var assetId = elm.getAttribute("data-quick-return");
+        var act = activeAssignmentFor(assetId);
+        if(act) checkInAssignment(act.id);
+      };
+    });
+    document.querySelectorAll("[data-set-status]").forEach(function(elm){
+      elm.onclick = function(){
+        var parts = elm.getAttribute("data-set-status").split("|");
+        setAssetStatus(parts[0], parts[1]);
+      };
+    });
+    document.querySelectorAll("[data-delete-asset]").forEach(function(elm){
+      elm.onclick = function(){
+        var assetId = elm.getAttribute("data-delete-asset");
+        var a = getAsset(assetId);
+        openModal("confirm", {title:"Delete Asset", message:"Delete "+(a?escapeHtml(a.name):"this asset")+" permanently? This removes its assignment and maintenance history too. This can't be undone.", confirmLabel:"Delete", onConfirm:function(){ deleteAsset(assetId); }});
+      };
+    });
+    var confirmYes = document.getElementById("confirm-yes");
+    if(confirmYes) confirmYes.onclick = function(){ var fn = ui.modal.onConfirm; closeModal(); if(fn) fn(); };
+
+    ["f-status","f-category","f-location"].forEach(function(id){
+      var elm = document.getElementById(id);
+      if(elm) elm.onchange = function(){
+        var key = id.replace("f-","");
+        ui.assetFilters[key] = elm.value; render();
+      };
+    });
+    var clearBtn = document.getElementById("clear-filters");
+    if(clearBtn) clearBtn.onclick = function(){ ui.assetFilters={status:"",category:"",location:""}; render(); };
+
+    document.querySelectorAll("[data-rtab]").forEach(function(elm){
+      elm.onclick = function(){ ui.reportsTab = elm.getAttribute("data-rtab"); render(); };
+    });
+    var exportBtn = document.getElementById("export-csv");
+    if(exportBtn) exportBtn.onclick = exportCsv;
+
+    var addCat = document.getElementById("add-cat");
+    if(addCat) addCat.onclick = function(){
+      var input = document.getElementById("new-cat-name");
+      var v = input.value.trim();
+      if(!v) return;
+      state.categories.push({id:uid("cat"), name:v});
+      toast("Category added."); saveState(); render();
+    };
+    var addLoc = document.getElementById("add-loc");
+    if(addLoc) addLoc.onclick = function(){
+      var input = document.getElementById("new-loc-name");
+      var v = input.value.trim();
+      if(!v) return;
+      state.locations.push({id:uid("loc"), name:v});
+      toast("Location added."); saveState(); render();
+    };
+    document.querySelectorAll("[data-del-category]").forEach(function(elm){
+      elm.onclick = function(){
+        var id = elm.getAttribute("data-del-category");
+        var used = state.assets.some(function(a){ var c=state.categories.find(function(x){return x.id===id;}); return c && a.category===c.name; });
+        if(used){ toast("Can't delete a category that's in use.", true); return; }
+        state.categories = state.categories.filter(function(c){return c.id!==id;});
+        saveState(); render();
+      };
+    });
+    document.querySelectorAll("[data-del-location]").forEach(function(elm){
+      elm.onclick = function(){
+        var id = elm.getAttribute("data-del-location");
+        var used = state.assets.some(function(a){ var l=state.locations.find(function(x){return x.id===id;}); return l && a.location===l.name; });
+        if(used){ toast("Can't delete a location that's in use.", true); return; }
+        state.locations = state.locations.filter(function(l){return l.id!==id;});
+        saveState(); render();
+      };
+    });
+  }
+
+  /* ---------------- Boot ---------------- */
+  loadState().then(function(){ render(); }).catch(function(e){
+    console.error(e);
+    state = seedData();
+    render();
+  });
+})();
+</script>

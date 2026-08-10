@@ -23,13 +23,18 @@ export default function Assignments() {
     { key: 'assigned_date', label: 'Assigned Date' },
     { key: 'expected_return_date', label: 'Expected Return' },
     { key: 'status', label: 'Status', render: (row) => <StatusBadge status={row.status} /> },
-    { key: 'actions', label: 'Actions', render: (row) =>
-      row.status === 'ASSIGNED' ? (
-        <button onClick={(e) => { e.stopPropagation(); handleReturn(row.id) }}
-          className="text-sm text-primary-600 hover:text-primary-700 font-medium flex items-center">
-          <RefreshCw className="w-3 h-3 mr-1" />Return
-        </button>
-      ) : <span className="text-sm text-gray-400">Returned</span>
+    {
+      key: 'actions',
+      label: 'Actions',
+      render: (row) =>
+        row.status === 'ASSIGNED' ? (
+          <button onClick={(e) => { e.stopPropagation(); handleReturn(row.id) }} className="text-sm text-primary-600 hover:text-primary-700 font-medium flex items-center">
+            <RefreshCw className="w-3 h-3 mr-1" />
+            Return
+          </button>
+        ) : (
+          <span className="text-sm text-gray-400">Returned</span>
+        ),
     },
   ]
 
