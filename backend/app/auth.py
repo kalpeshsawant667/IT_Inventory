@@ -1,4 +1,3 @@
-"""Authentication utilities: password hashing and JWT token management."""
 from datetime import datetime, timedelta
 from typing import Optional, Union
 from jose import JWTError, jwt

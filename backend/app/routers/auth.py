@@ -2,11 +2,10 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
-from datetime import timedelta
 
 from app.database import get_db
 from app import models, schemas
-from app.auth import verify_password, create_access_token, create_refresh_token, decode_token
+from app.auth import verify_password, create_access_token, create_refresh_token, decode_token, get_password_hash
 
 router = APIRouter()
 
@@ -28,12 +27,11 @@ def login(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="User account is inactive"
         )
-
-    # Update last login
+    
     from sqlalchemy.sql import func
     user.last_login = func.now()
     db.commit()
-
+    
     access_token = create_access_token(subject=user.id)
     refresh_token = create_refresh_token(subject=user.id)
     return {
@@ -61,7 +59,7 @@ def refresh_token(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="User not found or inactive"
         )
-
+    
     access_token = create_access_token(subject=user.id)
     refresh_token = create_refresh_token(subject=user.id)
     return {
@@ -69,3 +67,29 @@ def refresh_token(
         "refresh_token": refresh_token,
         "token_type": "bearer"
     }
+
+
+@router.post("/register", response_model=schemas.UserResponse, status_code=status.HTTP_201_CREATED)
+def register(
+    user_in: schemas.UserCreate,
+    db: Session = Depends(get_db)
+):
+    """Public registration — no auth required."""
+    existing = db.query(models.User).filter(models.User.email == user_in.email).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="Email already registered")
+    
+    db_user = models.User(
+        email=user_in.email,
+        password_hash=get_password_hash(user_in.password),
+        first_name=user_in.first_name,
+        last_name=user_in.last_name,
+        phone=user_in.phone,
+        role_id=user_in.role_id or 2,
+        department_id=user_in.department_id,
+        is_active=True
+    )
+    db.add(db_user)
+    db.commit()
+    db.refresh(db_user)
+    return db_user

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { Package, AlertCircle } from 'lucide-react'
 
@@ -69,6 +69,12 @@ export default function Login() {
           >
             {loading ? 'Signing in...' : 'Sign in'}
           </button>
+                    <p className="text-center text-sm text-slate-400">
+            Don't have an account?{' '}
+            <Link to="/signup" className="text-primary-400 hover:text-primary-300">
+              Sign up
+            </Link>
+          </p>
         </form>
       </div>
     </div>
