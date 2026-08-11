@@ -7,9 +7,10 @@ password_hash = bcrypt.hashpw(password, bcrypt.gensalt()).decode('utf-8')
 
 odbc_str = (
     "DRIVER={ODBC Driver 17 for SQL Server};"
-    "SERVER=PC-PF3RD5DF\\SQLEXPRESS;"
+    "SERVER=localhost;"
     "DATABASE=IT_Inventory;"
     "Trusted_Connection=yes;"
+    "TrustServerCertificate=yes;"
 )
 
 conn = pyodbc.connect(odbc_str)
