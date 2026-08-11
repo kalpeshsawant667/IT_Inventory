@@ -7,7 +7,6 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell
 } from 'recharts'
 
-// Design tokens ported from the Asset Ledger dark theme
 const COLORS = {
   bg: '#0B0F14',
   panel: '#121822',
@@ -37,32 +36,83 @@ export default function Dashboard() {
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    api.get('/dashboard/').then((res) => {
-      setData(res.data)
-      setLoading(false)
-    })
-  }, [])
+const [data, setData] = useState(null)
+const [loading, setLoading] = useState(true)
+const [error, setError] = useState(null)
 
-  if (loading) {
-    return (
-      <div
-        className="flex flex-col items-center justify-center gap-3"
-        style={{ minHeight: '60vh', color: COLORS.textDim, fontFamily: monoFont, fontSize: 12 }}
-      >
-        <div
-          style={{
-            width: 22, height: 22, borderRadius: '50%',
-            border: `2px solid ${COLORS.border}`, borderTopColor: COLORS.accent,
-            animation: 'spin .7s linear infinite'
-          }}
-        />
-        <span>LOADING DASHBOARD…</span>
-        <style>{`@keyframes spin{to{transform:rotate(360deg);}}`}</style>
-      </div>
-    )
+useEffect(() => {
+  const loadDashboard = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+
+      const res = await api.get('/dashboard/')
+      console.log('Dashboard response:', res.data)
+
+      setData(res.data)
+    } catch (err) {
+      console.error('Dashboard API error:', err)
+
+      setError(
+        err.response?.data?.detail ||
+        err.response?.data?.message ||
+        err.message ||
+        'Failed to load dashboard'
+      )
+    } finally {
+      setLoading(false)
+    }
   }
 
+  loadDashboard()
+}, [])
+
+  if (loading) {
+  return (
+    <div
+      className="flex flex-col items-center justify-center gap-3"
+      style={{
+        minHeight: '60vh',
+        color: COLORS.textDim,
+        fontFamily: monoFont,
+        fontSize: 12,
+      }}
+    >
+      <div
+        style={{
+          width: 22,
+          height: 22,
+          borderRadius: '50%',
+          border: `2px solid ${COLORS.border}`,
+          borderTopColor: COLORS.accent,
+          animation: 'spin .7s linear infinite',
+        }}
+      />
+      LOADING DASHBOARD…
+    </div>
+  )
+}
+
+if (error) {
+  return (
+    <div
+      style={{
+        padding: 24,
+        color: COLORS.danger,
+        fontFamily,
+      }}
+    >
+      <h2 style={{ margin: '0 0 8px' }}>Unable to load dashboard</h2>
+      <p style={{ color: COLORS.textDim, fontSize: 13 }}>
+        {error}
+      </p>
+    </div>
+  )
+}
+
+if (!data) {
+  return null
+}
   const stats = data.stats
   const statusData = Object.entries(data.assets_by_status).map(([name, value]) => ({ name, value }))
   const categoryData = data.assets_by_category
@@ -202,7 +252,17 @@ function Panel({ title, children }) {
         padding: '18px 20px',
       }}
     >
-      <h3 style={{ fontFamily: displayFont, fontSize: 14, margin: '0 0 14px', color: COLORS.text }}>{title}</h3>
+      <h3
+        style={{
+          fontFamily: displayFont,
+          fontSize: 14,
+          margin: '0 0 14px',
+          color: COLORS.text,
+        }}
+      >
+        {title}
+      </h3>
+
       {children}
     </div>
   )
@@ -220,19 +280,42 @@ function StatCard({ icon: Icon, label, value, accent }) {
         overflow: 'hidden',
       }}
     >
-      <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 3, background: accent }} />
-      <div className="flex items-center justify-between">
+      <div
+        style={{
+          position: 'absolute',
+          left: 0,
+          top: 0,
+          bottom: 0,
+          width: 3,
+          background: accent,
+        }}
+      />
+
+      <div className="flex items-center gap-2">
+        <Icon size={16} color={accent} />
+
         <span
           style={{
-            fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.06em',
-            color: COLORS.textFaint, fontWeight: 600,
+            fontSize: 11,
+            textTransform: 'uppercase',
+            letterSpacing: '0.06em',
+            color: COLORS.textFaint,
+            fontWeight: 600,
           }}
         >
           {label}
         </span>
-        <Icon size={16} color={accent} strokeWidth={2} />
       </div>
-      <div style={{ fontFamily: displayFont, fontSize: 28, fontWeight: 700, marginTop: 6, color: COLORS.text }}>
+
+      <div
+        style={{
+          fontFamily: displayFont,
+          fontSize: 28,
+          fontWeight: 700,
+          marginTop: 6,
+          color: COLORS.text,
+        }}
+      >
         {value}
       </div>
     </div>
