@@ -1,10 +1,25 @@
 import { useEffect, useState } from 'react'
 import api from '../services/api'
+
 import {
-  Package, Users, Wrench, AlertTriangle, Activity
+  Package,
+  Users,
+  Wrench,
+  AlertTriangle,
+  Activity
 } from 'lucide-react'
+
 import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell
 } from 'recharts'
 
 const COLORS = {
@@ -26,7 +41,14 @@ const COLORS = {
   infoGlow: 'rgba(91,147,255,0.14)',
 }
 
-const PIE_COLORS = [COLORS.accent, COLORS.info, COLORS.warn, COLORS.danger, '#8b5cf6', COLORS.textDim]
+const PIE_COLORS = [
+  COLORS.accent,
+  COLORS.info,
+  COLORS.warn,
+  COLORS.danger,
+  '#8b5cf6',
+  COLORS.textDim
+]
 
 const fontFamily = "'Inter', sans-serif"
 const displayFont = "'Space Grotesk', sans-serif"
@@ -35,84 +57,85 @@ const monoFont = "'JetBrains Mono', monospace"
 export default function Dashboard() {
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
 
-const [data, setData] = useState(null)
-const [loading, setLoading] = useState(true)
-const [error, setError] = useState(null)
+  useEffect(() => {
+    const loadDashboard = async () => {
+      try {
+        setLoading(true)
+        setError(null)
 
-useEffect(() => {
-  const loadDashboard = async () => {
-    try {
-      setLoading(true)
-      setError(null)
+        const res = await api.get('/dashboard/')
+        console.log('Dashboard response:', res.data)
 
-      const res = await api.get('/dashboard/')
-      console.log('Dashboard response:', res.data)
+        setData(res.data)
+      } catch (err) {
+        console.error('Dashboard API error:', err)
 
-      setData(res.data)
-    } catch (err) {
-      console.error('Dashboard API error:', err)
-
-      setError(
-        err.response?.data?.detail ||
-        err.response?.data?.message ||
-        err.message ||
-        'Failed to load dashboard'
-      )
-    } finally {
-      setLoading(false)
+        setError(
+          err.response?.data?.detail ||
+          err.response?.data?.message ||
+          err.message ||
+          'Failed to load dashboard'
+        )
+      } finally {
+        setLoading(false)
+      }
     }
-  }
 
-  loadDashboard()
-}, [])
+    loadDashboard()
+  }, [])
 
   if (loading) {
-  return (
-    <div
-      className="flex flex-col items-center justify-center gap-3"
-      style={{
-        minHeight: '60vh',
-        color: COLORS.textDim,
-        fontFamily: monoFont,
-        fontSize: 12,
-      }}
-    >
+    return (
+      <div
+        className="flex flex-col items-center justify-center gap-3"
+        style={{
+          minHeight: '60vh',
+          color: COLORS.textDim,
+          fontFamily: monoFont,
+          fontSize: 12,
+        }}
+      >
+        <div
+          style={{
+            width: 22,
+            height: 22,
+            borderRadius: '50%',
+            border: `2px solid ${COLORS.border}`,
+            borderTopColor: COLORS.accent,
+            animation: 'spin .7s linear infinite',
+          }}
+        />
+        LOADING DASHBOARD…
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
       <div
         style={{
-          width: 22,
-          height: 22,
-          borderRadius: '50%',
-          border: `2px solid ${COLORS.border}`,
-          borderTopColor: COLORS.accent,
-          animation: 'spin .7s linear infinite',
+          padding: 24,
+          color: COLORS.danger,
+          fontFamily,
         }}
-      />
-      LOADING DASHBOARD…
-    </div>
-  )
-}
+      >
+        <h2 style={{ margin: '0 0 8px' }}>
+          Unable to load dashboard
+        </h2>
 
-if (error) {
-  return (
-    <div
-      style={{
-        padding: 24,
-        color: COLORS.danger,
-        fontFamily,
-      }}
-    >
-      <h2 style={{ margin: '0 0 8px' }}>Unable to load dashboard</h2>
-      <p style={{ color: COLORS.textDim, fontSize: 13 }}>
-        {error}
-      </p>
-    </div>
-  )
-}
+        <p style={{ color: COLORS.textDim, fontSize: 13 }}>
+          {error}
+        </p>
+      </div>
+    )
+  }
 
-if (!data) {
-  return null
-}
+  if (!data) {
+    return null
+  }
+
   const stats = data.stats
   const statusData = Object.entries(data.assets_by_status).map(([name, value]) => ({ name, value }))
   const categoryData = data.assets_by_category
