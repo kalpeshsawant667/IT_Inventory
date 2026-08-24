@@ -30,7 +30,6 @@ return (
     <div className="w-full max-w-md">
       <div className="bg-slate-800/60 backdrop-blur-lg border border-slate-700 rounded-2xl shadow-2xl p-8">
         
-        {/* Logo & Title */}
         <div className="text-center mb-8">
           <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-2xl bg-primary-500/10 border border-primary-500/20">
             <Package className="h-8 w-8 text-primary-400" />

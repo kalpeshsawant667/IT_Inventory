@@ -9,7 +9,7 @@ load_dotenv()
 # SQL Server connection
 odbc_str = (
     "DRIVER={ODBC Driver 18 for SQL Server};"
-    "SERVER=localhost;"
+    "SERVER=localhost\SQLEXPRESS;"
     "DATABASE=IT_Inventory;"
     "Trusted_Connection=yes;"
     "TrustServerCertificate=yes;"
