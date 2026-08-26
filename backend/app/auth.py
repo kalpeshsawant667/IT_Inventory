@@ -1,8 +1,8 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Optional, Union
-from jose import JWTError, jwt
-from passlib.context import CryptContext
 import os
+import bcrypt
+import jwt  # Use PyJWT or python-jose
 
 
 SECRET_KEY = os.getenv(
@@ -21,38 +21,35 @@ REFRESH_TOKEN_EXPIRE_DAYS = int(
 )
 
 
-# Password hashing
-pwd_context = CryptContext(
-    schemes=["bcrypt"],
-    deprecated="auto"
-)
-
-
+# Password hashing using native bcrypt (Python 3.13 Compatible)
 def verify_password(
     plain_password: str,
     hashed_password: str
 ) -> bool:
-    return pwd_context.verify(
-        plain_password,
-        hashed_password
-    )
+    if not plain_password or not hashed_password:
+        return False
+    pwd_bytes = plain_password.encode("utf-8")[:72]
+    hash_bytes = hashed_password.encode("utf-8")
+    return bcrypt.checkpw(pwd_bytes, hash_bytes)
 
 
 def get_password_hash(password: str) -> str:
-    return pwd_context.hash(password)
+    pwd_bytes = password.encode("utf-8")[:72]
+    salt = bcrypt.gensalt()
+    return bcrypt.hashpw(pwd_bytes, salt).decode("utf-8")
 
 
+# JWT Token Handlers
 def create_access_token(
     subject: Union[str, int],
     expires_delta: Optional[timedelta] = None
 ) -> str:
 
+    now = datetime.now(timezone.utc)
     if expires_delta:
-        expire = datetime.utcnow() + expires_delta
+        expire = now + expires_delta
     else:
-        expire = datetime.utcnow() + timedelta(
-            minutes=ACCESS_TOKEN_EXPIRE_MINUTES
-        )
+        expire = now + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
 
     to_encode = {
         "exp": expire,
@@ -69,9 +66,8 @@ def create_access_token(
 
 def create_refresh_token(subject: Union[str, int]) -> str:
 
-    expire = datetime.utcnow() + timedelta(
-        days=REFRESH_TOKEN_EXPIRE_DAYS
-    )
+    now = datetime.now(timezone.utc)
+    expire = now + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
 
     to_encode = {
         "exp": expire,
@@ -97,5 +93,5 @@ def decode_token(token: str) -> Optional[dict]:
 
         return payload
 
-    except JWTError:
+    except Exception:  # Catches JWT decoding errors safely
         return None

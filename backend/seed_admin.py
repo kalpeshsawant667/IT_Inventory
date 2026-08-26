@@ -1,13 +1,17 @@
 import pyodbc
 import bcrypt
 
-# Hash password using bcrypt directly
-password = "admin123".encode('utf-8')
-password_hash = bcrypt.hashpw(password, bcrypt.gensalt()).decode('utf-8')
+# Password hashing
+password = "admin123".encode("utf-8")
+password_hash = bcrypt.hashpw(
+    password,
+    bcrypt.gensalt()
+).decode("utf-8")
 
+# SQL Server connection
 odbc_str = (
     "DRIVER={ODBC Driver 17 for SQL Server};"
-    "SERVER=localhost;"
+    "SERVER=localhost\\SQLEXPRESS;"
     "DATABASE=IT_Inventory;"
     "Trusted_Connection=yes;"
     "TrustServerCertificate=yes;"
@@ -16,25 +20,63 @@ odbc_str = (
 conn = pyodbc.connect(odbc_str)
 cursor = conn.cursor()
 
-# Check if admin exists
-cursor.execute("SELECT COUNT(*) FROM users WHERE email = ?", ("admin@itinventory.com",))
+# Check if admin already exists
+cursor.execute(
+    "SELECT COUNT(*) FROM dbo.users WHERE email = ?",
+    ("admin@itinventory.com",)
+)
+
 if cursor.fetchone()[0] > 0:
     print("Admin user already exists.")
     conn.close()
-    exit(0)
+    exit()
 
-# Insert admin
+# Get the next ID manually since identity auto-increment is off
+cursor.execute("SELECT ISNULL(MAX(id), 0) + 1 FROM dbo.users")
+next_id = cursor.fetchone()[0]
+
+# Insert admin with explicit ID
 cursor.execute("""
-    INSERT INTO users (email, password_hash, first_name, last_name, role_id, is_active)
-    VALUES (?, ?, ?, ?, ?, ?)
+    INSERT INTO dbo.users (
+        id,
+        employee_id,
+        first_name,
+        last_name,
+        email,
+        phone,
+        department,
+        designation,
+        location,
+        status,
+        created_at,
+        password_hash,
+        role_id,
+        is_active,
+        department_id
+    )
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, GETDATE(), ?, ?, ?, ?)
 """, (
-    "admin@itinventory.com",
-    password_hash,
+    next_id,
+    "EMP-001",
     "Admin",
     "User",
-    1,   # admin role
-    1    # active
+    "admin@itinventory.com",
+    "555-0199",
+    "IT",
+    "System Administrator",
+    "Headquarters",
+    "Active",
+    password_hash,
+    1,
+    1,
+    1
 ))
+
 conn.commit()
-print("Admin created! Email: admin@itinventory.com | Password: admin123")
+
+print("Admin created successfully!")
+print("Email: admin@itinventory.com")
+print("Password: admin123")
+print(f"Generated ID: {next_id}")
+
 conn.close()
