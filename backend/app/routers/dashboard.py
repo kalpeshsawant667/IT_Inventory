@@ -1,4 +1,3 @@
-"""Dashboard router with KPIs and analytics."""
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from sqlalchemy import func, extract
@@ -32,10 +31,11 @@ def get_dashboard(
         models.Asset.warranty_expiry >= datetime.utcnow().date()
     ).count()
 
-    # Low stock consumables
-    low_stock = db.query(models.Consumable).filter(
-        models.Consumable.quantity <= models.Consumable.reorder_level
-    ).count()
+    low_stock = 0
+    if hasattr(models, "Consumable"):
+        low_stock = db.query(models.Consumable).filter(
+            models.Consumable.quantity <= models.Consumable.reorder_level
+        ).count()
 
     # Recent activity
     recent_activity = db.query(models.AuditLog).order_by(
@@ -43,18 +43,26 @@ def get_dashboard(
     ).limit(10).all()
 
     activity_list = []
-    for log in recent_activity:
-        user_name = None
-        if log.performed_by_user:
-            user_name = f"{log.performed_by_user.first_name} {log.performed_by_user.last_name or ''}".strip()
-        activity_list.append({
-            "id": log.id,
-            "action": log.action,
-            "table_name": log.table_name,
-            "record_id": log.record_id,
-            "performed_by": user_name,
-            "created_at": log.created_at
-        })
+    if hasattr(models, "AuditLog"):
+        recent_activity = db.query(models.AuditLog).order_by(
+            models.AuditLog.created_at.desc()
+        ).limit(10).all()
+
+        for log in recent_activity:
+            user_name = "System"
+            if hasattr(log, "performed_by_user") and log.performed_by_user:
+                user_name = f"{log.performed_by_user.first_name} {log.performed_by_user.last_name or ''}".strip()
+            elif hasattr(log, "performed_by"):
+                user_name = str(log.performed_by)
+
+            activity_list.append({
+                "id": log.id,
+                "action": getattr(log, "action", "Updated"),
+                "table_name": getattr(log, "table_name", "Asset"),
+                "record_id": getattr(log, "record_id", log.id),
+                "performed_by": user_name,
+                "created_at": log.created_at
+            })
 
     # Assets by status
     status_counts = db.query(models.Asset.status, func.count(models.Asset.id)).group_by(models.Asset.status).all()
