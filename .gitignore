@@ -220,3 +220,4 @@ __marimo__/
 package-lock.json
 
 database.py
+seed_admin.py
