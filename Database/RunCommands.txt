@@ -3,3 +3,6 @@ python -m uvicorn app.main:app --reload
 
 Frontend:
 npm run dev
+
+To start app:
+npx expo start

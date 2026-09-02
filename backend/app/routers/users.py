@@ -26,7 +26,13 @@ def list_users(
             (models.User.first_name.ilike(f"%{search}%")) |
             (models.User.last_name.ilike(f"%{search}%"))
         )
-    return query.offset(skip).limit(limit).all()
+    return (
+        query
+        .order_by(User.user_id)
+        .offset(skip)
+        .limit(limit)
+        .all()
+        )
 
 
 @router.get("/me", response_model=schemas.UserResponse)
@@ -106,3 +112,9 @@ def delete_user(
     db.delete(user)
     db.commit()
     return None
+
+@router.post("/logout")
+def logout():
+    return {
+        "message": "Successfully logged out"
+    }
