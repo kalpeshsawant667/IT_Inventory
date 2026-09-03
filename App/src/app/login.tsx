@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, Link } from 'expo-router';
-import { Package, AlertCircle } from 'lucide-react-native';
+import { Feather } from '@expo/vector-icons';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -22,7 +22,7 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  
+
   // const { login } = useAuth();
 
   const handleSubmit = async () => {
@@ -55,7 +55,7 @@ export default function LoginScreen() {
             {/* Header Icon & Title */}
             <ThemedView style={styles.header}>
               <ThemedView style={styles.iconContainer}>
-                <Package size={32} color="#38bdf8" />
+                <Feather name="package" size={32} color="#38bdf8" />
               </ThemedView>
               <ThemedText type="title" style={styles.title}>
                 IT Inventory
@@ -68,7 +68,7 @@ export default function LoginScreen() {
             {/* Error Message */}
             {error ? (
               <ThemedView style={styles.errorBox}>
-                <AlertCircle size={18} color="#f87171" />
+                <Feather name="alert-circle" size={18} color="#f87171" />
                 <ThemedText style={styles.errorText}>{error}</ThemedText>
               </ThemedView>
             ) : null}
