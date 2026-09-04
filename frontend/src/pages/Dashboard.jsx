@@ -132,13 +132,20 @@ export default function Dashboard() {
     )
   }
 
-  if (!data) {
-    return null
+  // Fallback defaults if data structure is missing or empty
+  const stats = data?.stats || {
+    total_assets: 0,
+    assigned_assets: 0,
+    in_repair_assets: 0,
+    upcoming_warranty_expiry: 0,
   }
 
-  const stats = data.stats
-  const statusData = Object.entries(data.assets_by_status).map(([name, value]) => ({ name, value }))
-  const categoryData = data.assets_by_category
+  const statusData = data?.assets_by_status
+    ? Object.entries(data.assets_by_status).map(([name, value]) => ({ name, value }))
+    : []
+
+  const categoryData = data?.assets_by_category || []
+  const recentActivity = data?.recent_activity || []
 
   return (
     <div style={{ fontFamily, color: COLORS.text }} className="space-y-6">
@@ -171,96 +178,124 @@ export default function Dashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <Panel title="Assets by Status">
-          <ResponsiveContainer width="100%" height={280}>
-            <PieChart>
-              <Pie
-                data={statusData}
-                dataKey="value"
-                nameKey="name"
-                cx="50%"
-                cy="50%"
-                outerRadius={95}
-                stroke={COLORS.panel}
-                strokeWidth={2}
-              >
-                {statusData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip
-                contentStyle={{
-                  background: COLORS.panelAlt,
-                  border: `1px solid ${COLORS.border}`,
-                  borderRadius: 8,
-                  color: COLORS.text,
-                  fontSize: 12,
-                  fontFamily,
-                }}
-                itemStyle={{ color: COLORS.text }}
-                labelStyle={{ color: COLORS.textDim }}
-              />
-            </PieChart>
-          </ResponsiveContainer>
+          {statusData.length > 0 ? (
+            <ResponsiveContainer width="100%" height={280}>
+              <PieChart>
+                <Pie
+                  data={statusData}
+                  dataKey="value"
+                  nameKey="name"
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={95}
+                  stroke={COLORS.panel}
+                  strokeWidth={2}
+                >
+                  {statusData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip
+                  contentStyle={{
+                    background: COLORS.panelAlt,
+                    border: `1px solid ${COLORS.border}`,
+                    borderRadius: 8,
+                    color: COLORS.text,
+                    fontSize: 12,
+                    fontFamily,
+                  }}
+                  itemStyle={{ color: COLORS.text }}
+                  labelStyle={{ color: COLORS.textDim }}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+          ) : (
+            <EmptyBox message="No asset status data recorded yet." />
+          )}
         </Panel>
 
         <Panel title="Assets by Category">
-          <ResponsiveContainer width="100%" height={280}>
-            <BarChart data={categoryData}>
-              <CartesianGrid strokeDasharray="3 3" stroke={COLORS.border} vertical={false} />
-              <XAxis dataKey="name" tick={{ fill: COLORS.textDim, fontSize: 11 }} axisLine={{ stroke: COLORS.border }} tickLine={false} />
-              <YAxis tick={{ fill: COLORS.textDim, fontSize: 11 }} axisLine={{ stroke: COLORS.border }} tickLine={false} />
-              <Tooltip
-                cursor={{ fill: COLORS.panelAlt }}
-                contentStyle={{
-                  background: COLORS.panelAlt,
-                  border: `1px solid ${COLORS.border}`,
-                  borderRadius: 8,
-                  color: COLORS.text,
-                  fontSize: 12,
-                  fontFamily,
-                }}
-                itemStyle={{ color: COLORS.text }}
-                labelStyle={{ color: COLORS.textDim }}
-              />
-              <Bar dataKey="count" fill={COLORS.accentDim} radius={[5, 5, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
+          {categoryData.length > 0 ? (
+            <ResponsiveContainer width="100%" height={280}>
+              <BarChart data={categoryData}>
+                <CartesianGrid strokeDasharray="3 3" stroke={COLORS.border} vertical={false} />
+                <XAxis dataKey="name" tick={{ fill: COLORS.textDim, fontSize: 11 }} axisLine={{ stroke: COLORS.border }} tickLine={false} />
+                <YAxis tick={{ fill: COLORS.textDim, fontSize: 11 }} axisLine={{ stroke: COLORS.border }} tickLine={false} />
+                <Tooltip
+                  cursor={{ fill: COLORS.panelAlt }}
+                  contentStyle={{
+                    background: COLORS.panelAlt,
+                    border: `1px solid ${COLORS.border}`,
+                    borderRadius: 8,
+                    color: COLORS.text,
+                    fontSize: 12,
+                    fontFamily,
+                  }}
+                  itemStyle={{ color: COLORS.text }}
+                  labelStyle={{ color: COLORS.textDim }}
+                />
+                <Bar dataKey="count" fill={COLORS.accentDim} radius={[5, 5, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <EmptyBox message="No category data recorded yet." />
+          )}
         </Panel>
       </div>
 
       <Panel title="Recent Activity">
-        <div>
-          {data.recent_activity.map((log, i) => (
-            <div
-              key={log.id}
-              className="flex items-start gap-2.5"
-              style={{
-                padding: '9px 0',
-                borderBottom: i === data.recent_activity.length - 1 ? 'none' : `1px solid ${COLORS.border}`,
-                fontSize: 12.5,
-              }}
-            >
-              <span
+        {recentActivity.length > 0 ? (
+          <div>
+            {recentActivity.map((log, i) => (
+              <div
+                key={log.id}
+                className="flex items-start gap-2.5"
                 style={{
-                  width: 6, height: 6, borderRadius: '50%', background: COLORS.accent,
-                  marginTop: 5, flex: '0 0 6px',
+                  padding: '9px 0',
+                  borderBottom: i === recentActivity.length - 1 ? 'none' : `1px solid ${COLORS.border}`,
+                  fontSize: 12.5,
                 }}
-              />
-              <div className="flex-1">
-                <p style={{ margin: 0, color: COLORS.text }}>
-                  {log.action} on {log.table_name}
-                </p>
-                <p style={{ margin: '2px 0 0', color: COLORS.textFaint, fontSize: 11, fontFamily: monoFont }}>
-                  by {log.performed_by || 'System'} · {new Date(log.created_at).toLocaleString()}
-                </p>
+              >
+                <span
+                  style={{
+                    width: 6, height: 6, borderRadius: '50%', background: COLORS.accent,
+                    marginTop: 5, flex: '0 0 6px',
+                  }}
+                />
+                <div className="flex-1">
+                  <p style={{ margin: 0, color: COLORS.text }}>
+                    {log.action} on {log.table_name}
+                  </p>
+                  <p style={{ margin: '2px 0 0', color: COLORS.textFaint, fontSize: 11, fontFamily: monoFont }}>
+                    by {log.performed_by || 'System'} · {new Date(log.created_at).toLocaleString()}
+                  </p>
+                </div>
               </div>
-            </div>
-          ))}
-          {data.recent_activity.length === 0 && (
-            <p style={{ color: COLORS.textFaint, fontSize: 12.5 }}>No recent activity.</p>
-          )}
-        </div>
+            ))}
+          </div>
+        ) : (
+          <EmptyBox message="No recent activity logged." />
+        )}
       </Panel>
+    </div>
+  )
+}
+
+function EmptyBox({ message }) {
+  return (
+    <div
+      className="flex flex-col items-center justify-center"
+      style={{
+        height: 200,
+        border: `1px dashed ${COLORS.border}`,
+        borderRadius: 8,
+        color: COLORS.textFaint,
+        fontSize: 12.5,
+        fontFamily: monoFont,
+      }}
+    >
+      <Activity size={20} color={COLORS.textFaint} style={{ marginBottom: 8, opacity: 0.6 }} />
+      {message}
     </div>
   )
 }
