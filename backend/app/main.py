@@ -3,8 +3,12 @@ from fastapi.middleware.cors import CORSMiddleware
 import os
 
 from app.database import engine, Base
+# Importing all routers and models ensures metadata maps properly to engine
 from app.routers import auth, users, assets, assignments, locations, categories, vendors, maintenance, dashboard
+from app import models  
 
+# Automatically create database tables if they do not exist
+#Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title="IT Inventory API",
@@ -14,8 +18,10 @@ app = FastAPI(
     redoc_url="/redoc",
 )
 
-# CORS
-origins = os.getenv("CORS_ORIGINS", "http://localhost:5173").split(",")
+# Robust CORS Configuration: Handles localhost, 127.0.0.1, and env overrides
+raw_origins = os.getenv("CORS_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173")
+origins = [origin.strip() for origin in raw_origins.split(",") if origin.strip()]
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -24,7 +30,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Routers
+# Existing Routers (Unmodified)
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["Authentication"])
 app.include_router(users.router, prefix="/api/v1/users", tags=["Users"])
 app.include_router(assets.router, prefix="/api/v1/assets", tags=["Assets"])
