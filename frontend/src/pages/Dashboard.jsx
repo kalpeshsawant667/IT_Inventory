@@ -149,12 +149,6 @@ export default function Dashboard() {
 
   return (
     <div style={{ fontFamily, color: COLORS.text }} className="space-y-6">
-      <link rel="preconnect" href="https://fonts.googleapis.com" />
-      <link
-        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap"
-        rel="stylesheet"
-      />
-
       <div>
         <h1 style={{ fontFamily: displayFont, fontSize: 22, fontWeight: 700, letterSpacing: '-0.01em', margin: 0 }}>
           Dashboard
